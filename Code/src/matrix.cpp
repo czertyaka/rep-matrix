@@ -1,73 +1,107 @@
+/**
+ * @file matrix.cpp
+ * @author czertyaka
+ * @date 2020-08-10
+ * @brief Реализация методов Matrix
+ */
+
 #include "matrix.h"
 
-Matrix::Matrix()
+/**
+ * @brief Construct a new Matrix:: Matrix object
+ * @details Инициазирует значения по умолчанию: номер измерений - нулем, а массив наблюдений - 
+ * ссылкой на массив нулевой длины. В теле конструктора открывается база данных и заполняются 
+ * массивы матриц повторяемости некой дефолтной матрицей. Дефолтная матрица в БД доступна только
+ * на чтение. При этом соответсвующие ей журнал измерений _observation не заполняются - 
+ * предполагается, что такой массив будет чрезмерно велик.
+ */
+Matrix::Matrix():
+               _obsNumber(0),
+               _observation(new observation_t[_obsNumber])
 {
+    /* code opening DB and initializing the _wCold and _wWarm */
 }
 
+/**
+ * @brief Destroy the Matrix:: Matrix object
+ * @details Возвращает память, выделенную для журнала измерений, обратно в кучу.
+ */
 Matrix::~Matrix()
 {
+    delete [] _observation;
 }
 
-void Matrix::AddObservation(observation_t observation)
+/**
+ * @brief Открывает данные из БД
+ * @details В БД ищется единица данных "холодная матрица, теплая матрицы, измерения", заполняются
+ * массивы _wCold и _wWarm, выделяется память под измерения.
+ * @param name Имя единицы данных "холодная матрица, теплая матрицы, измерения"
+ * @warning Необходима проверка, насколько хорошо будет работать выделение памяти из кучи для
+ * больших массивов измерений.
+ */
+void Matrix::OpenMatrix(const char* name)
 {
-    int n = _WindDirIndex(observation);
-    int j = _SmithParamIndex(observation);
-    int k = _WindSpeedIndex(observation);
-
-    _m[n][j][k]++;
-    _CalculateMatrix();    
+    /* code, filling the _wCold and _wWarm, getting number of observations and memory allocationg
+    for observations */
 }
 
+/**
+ * @brief Сохраняет данные в БД
+ * @details В БД создается (если нужно) единица данных "холодная матрица, теплая матрицы, 
+ * измерения", в которую сохраняются текущие данные в полях _wCold, _wWarm и _observation
+ * @param name Имя единицы данных "холодная матрица, теплая матрицы, измерения"
+ * @warning Метод НЕ должен использоваться для сохранения под именем $default - будет добавлено
+ * исключение.
+ */
+void Matrix::SaveMatrix(const char* name)
+{
+    /* code checking if name != $default and saving the data to DB*/
+}
+
+/**
+ * @brief Стирает матрицу и журнал измерений
+ */
 void Matrix::ClearMatrix()
 {
-    for (int n = 0; n < _n; n++)
-    {
-        for (int j = 0; j < _j; j++)
-        {
-            for (int  k = 0; k < _k; k++)
-            {
-                _m[n][j][k] = 0;
-                _w[n][j][k] = 0;
-            }
-        }
-    }
+    /* code clearing _wCold, _wWarm, _obseravtion and setting _obsNumber = 0 */
 }
 
-void Matrix::GetMatrix(float*** pppMatrix)
+/**
+ * @brief Добавляет в матрицу единичное измерение
+ * @param data Структура со всеми необходимыми для расчета данными
+ */
+void Matrix::AddObservation(meteoData_t data)
 {
-    for (int n = 0; n < _n; n++)
-    {
-        for (int j = 0; j < _j; j++)
-        {
-            for (int  k = 0; k < _k; k++)
-            {
-                pppMatrix[n][j][k] = _w[n][j][k];
-            }
-        }
-    }
+    /* code, calculating matrixes and updating _observation and _obsNumber++ */
 }
 
-const int Matrix::GetN() { return _n; }
-const int Matrix::GetJ() { return _j; }
-const int Matrix::GetK() { return _k; }
-const int Matrix::GetSize() { return _n * _j * _k; }
-
-void Matrix::_CalculateMatrix()
+/**
+ * @brief Добавляет в матрицу измерения, содержащиеся в .CSV файле
+ * @details Парсит .CSV файл и добавляет измерения из него (вызов AddObservation(meteoData_t data)).
+ * @param path Имя файла с полным путем до него (по умолчанию - файл meteoData.csv в текущем
+ * каталоге)
+ */
+void Matrix::AddObservationFromCsv(const char* path = "meteoData.csv")
 {
-
+    /* code, parsing file, and adding the observations */
 }
 
-int Matrix::_WindDirIndex(observation_t observation)
+/**
+ * @brief Заполняет переданный указатель матрицей повторяемости в холодное время года
+ * @param matrix Указатель на трехмерный массив
+ * @warning Пользователь должен убедиться, что выделил достаточно места (поле size).
+ */
+void Matrix::GetColdMatrix(matrix_t matrix)
 {
-    return 0;
+    /* code, copying the _mCold to matrix */
 }
 
-int Matrix::_SmithParamIndex(observation_t observation)
+/**
+ * @brief Заполняет переданный указатель матрицей повторяемости в теплое время года
+ * @param matrix Указатель на трехмерный массив
+ * @warning Пользователь должен убедиться, что выделил достаточно места (поле size).
+ */
+void Matrix::GetWarmMatrix(matrix_t matrix)
 {
-    return 0;
-}
-
-int Matrix::_WindSpeedIndex(observation_t observation)
-{
-    return 0;
+    /* code, copying the _mWarm to matrix */
 }

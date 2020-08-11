@@ -5,22 +5,49 @@
  * @brief Файл с классои Matrix - основным классом расчетного модуля матрицы повторяемости
  */
 
+/**
+ * @brief Структура метеоданных
+ * @details Такая структура будет заполняться при парсинге одной строчки .csv-файла. В ней все 
+ * необходимые параметры для расчета полей структуры observaion_t
+ */
 struct meteoData_t
 {
+    double latitude; ///< широта
+    double longitude; ///< долгота
 
+    int day; ///< день
+    int month; ///< месяц
+    int year; ///< год
+    double time; ///< гринвичевское время
+
+    double windDir; ///< направление ветра
+    double windSpeed; ///< скорость ветра, м/с
+    int cloudAmount; ///< балл общей облачности
+    int lowerCloudAmount; ///< балл нижней облачности
+    bool fog; ///< наличие сильного тумана (видимость < 1 км)
+    bool snow; ///< наличие сплошного снежного покрова
 };
 
+/**
+ * @brief Структура наблюдения
+ * @details Струкутра наблюдения для заполнения ненормированной матрицы повторяемости. Каждой 
+ * матрице повторяемости ставится в соответсвие массив из таких структур, вместе с матрицой хранится
+ * в БД.
+ */
 struct observation_t
 {
-    int day;
-    int month;
-    int year;
-    double time;
+    int day; ///< день
+    int month; ///< месяц
+    int year; ///< год
+    double time; ///< гринвичевское время
 
-    double windSpeed;
-    double smithParam;
-    double windSpeed;
+    double windDir; ///< направление ветра
+    double smithParam; ///< параметр Смита (категория устойчивости атмосферы)
+    double windSpeed; ///< скорость ветра, м/с
+
+    observation_t(meteoData_t data);
 };
+
 
 /**
  * @brief Класс матрицы повторяемости

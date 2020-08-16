@@ -5,6 +5,7 @@
  * @brief Реализация методов Matrix
  */
 
+#include "obseravtion.h"
 #include "matrix.h"
 
 /**
@@ -17,7 +18,7 @@
  */
 Matrix::Matrix():
                _obsNumber(0),
-               _observation(new observation_t[_obsNumber])
+               _observation(new Observation[_obsNumber])
 {
     /* code opening DB and initializing the _wCold and _wWarm */
 }
@@ -78,10 +79,12 @@ void Matrix::AddObservation(meteoData_t data)
 /**
  * @brief Добавляет в матрицу измерения, содержащиеся в .CSV файле
  * @details Парсит .CSV файл и добавляет измерения из него (вызов AddObservation(meteoData_t data)).
- * @param path Имя файла с полным путем до него (по умолчанию - файл meteoData.csv в текущем
- * каталоге)
+ * @param filename Имя файла
+ * @param path Путь до файла (при передаче значения по умолчанию = 0, поиск будет производитя в 
+ * текущем каталоге)
  */
-void Matrix::AddObservationFromCsv(const char* path = "meteoData.csv")
+
+void Matrix::AddObservationFromCsv(const char* filename, const char* path/* = 0*/)
 {
     /* code, parsing file, and adding the observations */
 }

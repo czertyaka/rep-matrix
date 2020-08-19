@@ -61,7 +61,31 @@ void Matrix::ClearMatrix()
  */
 void Matrix::AddObservation(observation_t observation)
 {
-    /* code, calculating matrixes and updating _observation and _obsNumber++ */
+    _CheckConsistency(observation.windDir, observation.smithParam);
+    bool isAlreadyAdded = _CheckIfAdded(observation);
+
+    if (!isAlreadyAdded)
+    {
+        int n = _CalcN(observation.windDir);
+        int j = _CalcJ(observation.smithParam);
+        int k = _CalcK(observation.windSpeed);
+
+        switch (observation.month)
+        {
+        case november:
+        case december:
+        case january:
+        case february:
+        case march:
+            _mCold[n][j][k]++;
+            _Normalize((matrix_t)_mCold, (matrix_t)_wCold);
+            break;
+        default:
+            _mWarm[n][j][k]++;
+            _Normalize((matrix_t)_mWarm, (matrix_t)_wWarm);
+            break;
+        }
+    }
 }
 
 /**
@@ -95,4 +119,9 @@ void Matrix::GetColdMatrix(matrix_t matrix)
 void Matrix::GetWarmMatrix(matrix_t matrix)
 {
     /* code, copying the _mWarm to matrix */
+}
+
+bool Matrix::_CheckIfAdded(observation_t observation)
+{
+    /* code, checking if observation is already in _observations */
 }

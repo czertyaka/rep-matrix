@@ -54,6 +54,15 @@ public:
 
 private:
 
+    bool _CheckIfAdded(observation_t observation);
+    int _CalcN(compPoint_t windDir);
+    int _CalcJ(smithParam_t smithParam);
+    int _CalcK(double windSpeed);
+
+    void _CheckConsistency(double windSpeed, smithParam_t smithParam);
+
+    void _Normalize(matrix_t unnormalized, matrix_t normalized);
+
     int _mCold[N][J][K]; ///< ненормированная матрица повторяемости в холодное время года
     int _mWarm[N][J][K]; ///< ненормированная матрица повторяемости в теплое время года
 

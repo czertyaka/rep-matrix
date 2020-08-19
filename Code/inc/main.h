@@ -5,5 +5,4 @@
  * @brief Главный заголовочный файл проекта
  */
 
-#include "obseravtion.h"
 #include "matrix.h"

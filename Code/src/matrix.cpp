@@ -5,7 +5,6 @@
  * @brief Реализация методов Matrix
  */
 
-#include "obseravtion.h"
 #include "matrix.h"
 
 /**
@@ -16,20 +15,9 @@
  * на чтение. При этом соответсвующие ей журнал измерений _observation не заполняются - 
  * предполагается, что такой массив будет чрезмерно велик.
  */
-Matrix::Matrix():
-               _obsNumber(0),
-               _observation(new Observation[_obsNumber])
+Matrix::Matrix()
 {
     /* code opening DB and initializing the _wCold and _wWarm */
-}
-
-/**
- * @brief Destroy the Matrix:: Matrix object
- * @details Возвращает память, выделенную для журнала измерений, обратно в кучу.
- */
-Matrix::~Matrix()
-{
-    delete [] _observation;
 }
 
 /**
@@ -71,7 +59,7 @@ void Matrix::ClearMatrix()
  * @brief Добавляет в матрицу единичное измерение
  * @param data Структура со всеми необходимыми для расчета данными
  */
-void Matrix::AddObservation(meteoData_t data)
+void Matrix::AddObservation(observation_t observation)
 {
     /* code, calculating matrixes and updating _observation and _obsNumber++ */
 }

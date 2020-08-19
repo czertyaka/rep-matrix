@@ -1,6 +1,6 @@
 .DEFAULT := all
 
-OBJ := main.o matrix.o observation.o
+OBJ := main.o matrix.o stability_cathegory.o
 INC_PATH := ../Code/inc
 SRC_PATH := ../Code/src
 

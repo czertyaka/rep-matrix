@@ -4,6 +4,10 @@
  * @date 2020-08-10
  * @brief Файл с классои Matrix - основным классом расчетного модуля матрицы повторяемости
  */
+#include <vector>
+using namespace std;
+
+#include "stability_cathegory.h"
 
 /**
  * @brief Класс матрицы повторяемости
@@ -18,17 +22,28 @@ class Matrix
 
 public:
 
+    typedef float*** matrix_t ;
+    struct observation_t
+    {
+        int day; ///< день
+        month_t month; ///< месяц
+        int year; ///< год
+        double time; ///< гринвичевское время
+
+        compPoint_t windDir; ///< направление ветра, румб
+        smithParam_t smithParam; ///< параметр Смита (категория устойчивости атмосферы)
+        double windSpeed; ///< скорость ветра, м/с
+    };
+
     Matrix();
-    ~Matrix();
 
     void OpenMatrix(const char* name);
     void SaveMatrix(const char* name);
 
     void ClearMatrix();
-    void AddObservation(meteoData_t data);
+    void AddObservation(observation_t observation);
     void AddObservationFromCsv(const char* filename, const char* path = 0);
 
-    typedef float*** matrix_t ;
     void GetColdMatrix(matrix_t matrix);
     void GetWarmMatrix(matrix_t matrix);
 
@@ -45,7 +60,5 @@ private:
     double _wCold[N][J][K]; ///< матрица повторяемости в холодное время года
     double _wWarm[N][J][K]; ///< матрица повторяемости в теплое время года
 
-    Observation* _observation; ///< указатель на первый элемент динамически выделяемого массива
-                               ///< наблюдений
-    int _obsNumber; ///< количество наблюдений
+    vector<observation_t> _observations; ///< контейнер с наблюдениями
 };

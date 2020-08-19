@@ -9,25 +9,34 @@
 
 int main()
 {
-    meteoData_t data;
 
-    data.latitude = 56.833;
-    data.longitude = 60.583;
-    data.day = 16;
-    data.month = month_t::august;
-    data.year = 2020;
-    data.time = 17.4556;
-    data.windDir = compPoint_t::NNE;
-    data.windSpeed = 2;
-    data.cloudAmount = 5;
-    data.lowerCloudAmount = 3;
-    data.fog = false;
-    data.snow = false;
+    double latitude = 56.833;
+    double longitude = 60.583;
+    int day = 16;
+    month_t month = month_t::january;
+    int year = 2020;
+    double time = 17.4556;
+    double windSpeed = 0;
+    int cloudAmount = 5;
+    int lowerCloudAmount = 3;
+    bool fog = false;
+    bool snow = true;
 
-    Observation observation(data);
+    StabilityCathegory stabilityCathegory(
+        day,
+        month,
+        year,
+        time,
+        latitude,
+        longitude,
+        windSpeed,
+        cloudAmount,
+        lowerCloudAmount,
+        fog,
+        snow
+    );
 
-    observation_t obs;
-    observation.GetObservation(obs);
+    smithParam_t smithParam = stabilityCathegory.GetSmithParam();
 
     return 0;
 }

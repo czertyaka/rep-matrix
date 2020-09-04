@@ -13,7 +13,7 @@ int main()
     double latitude = 56.833;
     double longitude = 60.583;
     int day = 16;
-    month_t month = month_t::january;
+    meteorology::month_t month = meteorology::january;
     int year = 2020;
     double time = 17.4556;
     double windSpeed = 0;
@@ -36,7 +36,7 @@ int main()
         snow
     );
 
-    smithParam_t smithParam = stabilityCathegory.GetSmithParam();
+    meteorology::smithParam_t smithParam = stabilityCathegory.GetSmithParam();
 
     return 0;
 }

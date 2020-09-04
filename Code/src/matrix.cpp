@@ -7,6 +7,8 @@
 
 #include "matrix.h"
 
+using namespace meteorology;
+
 /**
  * @brief Construct a new Matrix:: Matrix object
  * @details Инициазирует значения по умолчанию: номер измерений - нулем, а массив наблюдений - 
@@ -59,7 +61,7 @@ void Matrix::ClearMatrix()
  * @brief Добавляет в матрицу единичное измерение
  * @param data Структура со всеми необходимыми для расчета данными
  */
-void Matrix::AddObservation(observation_t observation)
+void Matrix::_AddObservation(observation_t observation)
 {
     _CheckConsistency(observation.windDir, observation.smithParam);
     bool isAlreadyAdded = _CheckIfAdded(observation);
@@ -72,17 +74,17 @@ void Matrix::AddObservation(observation_t observation)
 
         switch (observation.month)
         {
-        case november:
-        case december:
-        case january:
-        case february:
-        case march:
+        case meteorology::november:
+        case meteorology::december:
+        case meteorology::january:
+        case meteorology::february:
+        case meteorology::march:
             _mCold[n][j][k]++;
-            _Normalize((matrix_t)_mCold, (matrix_t)_wCold);
+            _Normalize(_mCold, _wCold);
             break;
         default:
             _mWarm[n][j][k]++;
-            _Normalize((matrix_t)_mWarm, (matrix_t)_wWarm);
+            _Normalize(_mWarm, _wWarm);
             break;
         }
     }
@@ -124,4 +126,5 @@ void Matrix::GetWarmMatrix(matrix_t matrix)
 bool Matrix::_CheckIfAdded(observation_t observation)
 {
     /* code, checking if observation is already in _observations */
+    return false;
 }

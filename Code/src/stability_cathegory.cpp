@@ -12,7 +12,7 @@ double DegToRad(double degree) { return degree / 180 *M_PI; }
 
 StabilityCathegory::StabilityCathegory(
     int day,
-    month_t month,
+    meteorology::month_t month,
     int year,
     double time,
     double latitude,
@@ -38,7 +38,7 @@ StabilityCathegory::StabilityCathegory(
     _CalcSmithParam();
 }
 
-smithParam_t StabilityCathegory::GetSmithParam()
+meteorology::smithParam_t StabilityCathegory::GetSmithParam()
 {
     return _smithParam;
 }
@@ -54,15 +54,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathG;
-        case -2:    _smithParam = smithParam_t::cathF;
-        case -1:    _smithParam = smithParam_t::cathF;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathC;
-        case 2:     _smithParam = smithParam_t::cathB;
-        case 3:     _smithParam = smithParam_t::cathA;
-        case 4:     _smithParam = smithParam_t::cathA;
-        case 5:     _smithParam = smithParam_t::cathA;
+        case -3:    _smithParam = meteorology::smithParam_t::cathG;
+        case -2:    _smithParam = meteorology::smithParam_t::cathF;
+        case -1:    _smithParam = meteorology::smithParam_t::cathF;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathC;
+        case 2:     _smithParam = meteorology::smithParam_t::cathB;
+        case 3:     _smithParam = meteorology::smithParam_t::cathA;
+        case 4:     _smithParam = meteorology::smithParam_t::cathA;
+        case 5:     _smithParam = meteorology::smithParam_t::cathA;
         default:    break;
         }
     }
@@ -70,15 +70,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathG;
-        case -2:    _smithParam = smithParam_t::cathF;
-        case -1:    _smithParam = smithParam_t::cathE;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathC;
-        case 2:     _smithParam = smithParam_t::cathB;
-        case 3:     _smithParam = smithParam_t::cathB;
-        case 4:     _smithParam = smithParam_t::cathA;
-        case 5:     _smithParam = smithParam_t::cathA;
+        case -3:    _smithParam = meteorology::smithParam_t::cathG;
+        case -2:    _smithParam = meteorology::smithParam_t::cathF;
+        case -1:    _smithParam = meteorology::smithParam_t::cathE;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathC;
+        case 2:     _smithParam = meteorology::smithParam_t::cathB;
+        case 3:     _smithParam = meteorology::smithParam_t::cathB;
+        case 4:     _smithParam = meteorology::smithParam_t::cathA;
+        case 5:     _smithParam = meteorology::smithParam_t::cathA;
         default: break;
         }
     }
@@ -86,15 +86,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathF;
-        case -2:    _smithParam = smithParam_t::cathF;
-        case -1:    _smithParam = smithParam_t::cathE;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathD;
-        case 2:     _smithParam = smithParam_t::cathC;
-        case 3:     _smithParam = smithParam_t::cathB;
-        case 4:     _smithParam = smithParam_t::cathB;
-        case 5:     _smithParam = smithParam_t::cathA;
+        case -3:    _smithParam = meteorology::smithParam_t::cathF;
+        case -2:    _smithParam = meteorology::smithParam_t::cathF;
+        case -1:    _smithParam = meteorology::smithParam_t::cathE;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathD;
+        case 2:     _smithParam = meteorology::smithParam_t::cathC;
+        case 3:     _smithParam = meteorology::smithParam_t::cathB;
+        case 4:     _smithParam = meteorology::smithParam_t::cathB;
+        case 5:     _smithParam = meteorology::smithParam_t::cathA;
         default: break;
         }
     }
@@ -102,15 +102,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathF;
-        case -2:    _smithParam = smithParam_t::cathE;
-        case -1:    _smithParam = smithParam_t::cathD;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathD;
-        case 2:     _smithParam = smithParam_t::cathC;
-        case 3:     _smithParam = smithParam_t::cathB;
-        case 4:     _smithParam = smithParam_t::cathB;
-        case 5:     _smithParam = smithParam_t::cathA;
+        case -3:    _smithParam = meteorology::smithParam_t::cathF;
+        case -2:    _smithParam = meteorology::smithParam_t::cathE;
+        case -1:    _smithParam = meteorology::smithParam_t::cathD;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathD;
+        case 2:     _smithParam = meteorology::smithParam_t::cathC;
+        case 3:     _smithParam = meteorology::smithParam_t::cathB;
+        case 4:     _smithParam = meteorology::smithParam_t::cathB;
+        case 5:     _smithParam = meteorology::smithParam_t::cathA;
         default: break;
         }
     }
@@ -118,15 +118,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathE;
-        case -2:    _smithParam = smithParam_t::cathE;
-        case -1:    _smithParam = smithParam_t::cathD;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathD;
-        case 2:     _smithParam = smithParam_t::cathC;
-        case 3:     _smithParam = smithParam_t::cathC;
-        case 4:     _smithParam = smithParam_t::cathB;
-        case 5:     _smithParam = smithParam_t::cathB;
+        case -3:    _smithParam = meteorology::smithParam_t::cathE;
+        case -2:    _smithParam = meteorology::smithParam_t::cathE;
+        case -1:    _smithParam = meteorology::smithParam_t::cathD;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathD;
+        case 2:     _smithParam = meteorology::smithParam_t::cathC;
+        case 3:     _smithParam = meteorology::smithParam_t::cathC;
+        case 4:     _smithParam = meteorology::smithParam_t::cathB;
+        case 5:     _smithParam = meteorology::smithParam_t::cathB;
         default: break;
         }
     }
@@ -134,15 +134,15 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathE;
-        case -2:    _smithParam = smithParam_t::cathD;
-        case -1:    _smithParam = smithParam_t::cathD;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathD;
-        case 2:     _smithParam = smithParam_t::cathC;
-        case 3:     _smithParam = smithParam_t::cathC;
-        case 4:     _smithParam = smithParam_t::cathC;
-        case 5:     _smithParam = smithParam_t::cathB;
+        case -3:    _smithParam = meteorology::smithParam_t::cathE;
+        case -2:    _smithParam = meteorology::smithParam_t::cathD;
+        case -1:    _smithParam = meteorology::smithParam_t::cathD;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathD;
+        case 2:     _smithParam = meteorology::smithParam_t::cathC;
+        case 3:     _smithParam = meteorology::smithParam_t::cathC;
+        case 4:     _smithParam = meteorology::smithParam_t::cathC;
+        case 5:     _smithParam = meteorology::smithParam_t::cathB;
         default: break;
         }
     }
@@ -150,21 +150,21 @@ void StabilityCathegory::_CalcSmithParam()
     {
         switch (_insolClass)
         {
-        case -3:    _smithParam = smithParam_t::cathD;
-        case -2:    _smithParam = smithParam_t::cathD;
-        case -1:    _smithParam = smithParam_t::cathD;
-        case 0:     _smithParam = smithParam_t::cathD;
-        case 1:     _smithParam = smithParam_t::cathD;
-        case 2:     _smithParam = smithParam_t::cathD;
-        case 3:     _smithParam = smithParam_t::cathC;
-        case 4:     _smithParam = smithParam_t::cathC;
-        case 5:     _smithParam = smithParam_t::cathC;
+        case -3:    _smithParam = meteorology::smithParam_t::cathD;
+        case -2:    _smithParam = meteorology::smithParam_t::cathD;
+        case -1:    _smithParam = meteorology::smithParam_t::cathD;
+        case 0:     _smithParam = meteorology::smithParam_t::cathD;
+        case 1:     _smithParam = meteorology::smithParam_t::cathD;
+        case 2:     _smithParam = meteorology::smithParam_t::cathD;
+        case 3:     _smithParam = meteorology::smithParam_t::cathC;
+        case 4:     _smithParam = meteorology::smithParam_t::cathC;
+        case 5:     _smithParam = meteorology::smithParam_t::cathC;
         default: break;
         }
     }
     else if (_windSpeed >= 7.5)
     {
-        _smithParam = smithParam_t::cathD;
+        _smithParam = meteorology::smithParam_t::cathD;
     }
 }
 
@@ -244,9 +244,9 @@ double StabilityCathegory::_CalcAlbedo()
 
     switch (_month)
     {
-    case january: // зима
-    case february:
-    case december:
+    case meteorology::january: // зима
+    case meteorology::february:
+    case meteorology::december:
         if (_latitude <= 70 && _latitude > 60) { return 0.70; }
         if (_latitude <= 60 && _latitude > 50) { return 0.60; }
         if (_latitude <= 50 && _latitude > 40) { return 0.49; }
@@ -254,9 +254,9 @@ double StabilityCathegory::_CalcAlbedo()
         if (_latitude <= 30 && _latitude > 20) { return 0.26; }
         if (_latitude <= 20 && _latitude > 10) { return 0.24; }
         if (_latitude <= 10 && _latitude >= 0) { return 0.21; }
-    case march: // весна
-    case april:
-    case may:
+    case meteorology::march: // весна
+    case meteorology::april:
+    case meteorology::may:
         if (_latitude <= 70 && _latitude > 60) { return 0.70; }
         if (_latitude <= 60 && _latitude > 50) { return 0.57; }
         if (_latitude <= 50 && _latitude > 40) { return 0.42; }
@@ -264,9 +264,9 @@ double StabilityCathegory::_CalcAlbedo()
         if (_latitude <= 30 && _latitude > 20) { return 0.26; }
         if (_latitude <= 20 && _latitude > 10) { return 0.24; }
         if (_latitude <= 10 && _latitude >= 0) { return 0.21; }
-    case june: // лето
-    case july:
-    case august:
+    case meteorology::june: // лето
+    case meteorology::july:
+    case meteorology::august:
         if (_latitude <= 70 && _latitude > 60) { return 0.26; }
         if (_latitude <= 60 && _latitude > 50) { return 0.18; }
         if (_latitude <= 50 && _latitude > 40) { return 0.20; }
@@ -274,9 +274,9 @@ double StabilityCathegory::_CalcAlbedo()
         if (_latitude <= 30 && _latitude > 20) { return 0.24; }
         if (_latitude <= 20 && _latitude > 10) { return 0.22; }
         if (_latitude <= 10 && _latitude >= 0) { return 0.19; }
-    case september: // осень
-    case october:
-    case november:
+    case meteorology::september: // осень
+    case meteorology::october:
+    case meteorology::november:
         if (_latitude <= 70 && _latitude > 60) { return 0.24; }
         if (_latitude <= 60 && _latitude > 50) { return 0.18; }
         if (_latitude <= 50 && _latitude > 40) { return 0.20; }

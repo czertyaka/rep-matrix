@@ -128,3 +128,31 @@ bool Matrix::_CheckIfAdded(observation_t observation)
     /* code, checking if observation is already in _observations */
     return false;
 }
+
+int Matrix::_CalcN(meteorology::compPoint_t windDir)
+{
+    /* code, returning index, corresponding to the windDir */
+    return 0;
+}
+
+int Matrix::_CalcJ(meteorology::smithParam_t smithParam)
+{
+    /* code, returning index, corresponding to the smithParam */
+    return 0;
+}
+
+int Matrix::_CalcK(double windSpeed)
+{
+    /* code, returning index, corresponding to the windSpeed */
+    return 0;
+}
+
+void Matrix::_CheckConsistency(double windSpeed, meteorology::smithParam_t smithParam)
+{
+    /* code, checking if there id no conflict between windSpeed and smithParam values */
+}
+
+void Matrix::_Normalize(meteorology::unnormMatrix_t unnormalized, meteorology::matrix_t normalized)
+{
+    /* coding, converting unnormalized matrix to normalized */
+}

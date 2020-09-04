@@ -39,21 +39,16 @@ public:
 private:
 
     void _AddObservation(meteorology::observation_t observation);
-    bool _CheckIfAdded(meteorology::observation_t observation);
-    int _CalcN(meteorology::compPoint_t windDir);
-    int _CalcJ(meteorology::smithParam_t smithParam);
-    int _CalcK(double windSpeed);
+    bool _CheckIfAdded();
+    int _CalcN();
+    int _CalcJ();
+    int _CalcK();
 
-    void _CheckConsistency(double windSpeed, meteorology::smithParam_t smithParam);
+    void _CheckConsistency();
+    void _Normalize();
 
-    void _Normalize(meteorology::unnormMatrix_t unnormalized, meteorology::matrix_t normalized);
-
-    meteorology::unnormMatrix_t _mCold; ///< ненормированная матрица повторяемости в холодное время года
-    meteorology::unnormMatrix_t _mWarm; ///< ненормированная матрица повторяемости в теплое время года
-
-    meteorology::matrix_t _wCold; ///< матрица повторяемости в холодное время года
-    meteorology::matrix_t _wWarm; ///< матрица повторяемости в теплое время года
-
+    meteorology::matrix_t _matrix; ///< матрица повторяемости
+    meteorology::observation_t _currentObservation; ///< обрабатываемое наблюдение
     std::vector<meteorology::observation_t> _observations; ///< контейнер с наблюдениями
 };
 

@@ -63,14 +63,15 @@ void Matrix::ClearMatrix()
  */
 void Matrix::_AddObservation(observation_t observation)
 {
-    _CheckConsistency(observation.windDir, observation.smithParam);
-    bool isAlreadyAdded = _CheckIfAdded(observation);
+    _currentObservation = observation;
+    _CheckConsistency();
+    bool isAlreadyAdded = _CheckIfAdded();
 
     if (!isAlreadyAdded)
     {
-        int n = _CalcN(observation.windDir);
-        int j = _CalcJ(observation.smithParam);
-        int k = _CalcK(observation.windSpeed);
+        int n = _CalcN();
+        int j = _CalcJ();
+        int k = _CalcK();
 
         switch (observation.month)
         {
@@ -79,12 +80,12 @@ void Matrix::_AddObservation(observation_t observation)
         case meteorology::january:
         case meteorology::february:
         case meteorology::march:
-            _mCold[n][j][k]++;
-            _Normalize(_mCold, _wCold);
+            _matrix.mCold[n][j][k]++;
+            _Normalize();
             break;
         default:
-            _mWarm[n][j][k]++;
-            _Normalize(_mWarm, _wWarm);
+            _matrix.mWarm[n][j][k]++;
+            _Normalize();
             break;
         }
     }
@@ -106,7 +107,6 @@ void Matrix::AddObservationFromCsv(const char* filename, const char* path/* = 0*
 /**
  * @brief Заполняет переданный указатель матрицей повторяемости в холодное время года
  * @param matrix Указатель на трехмерный массив
- * @warning Пользователь должен убедиться, что выделил достаточно места (поле size).
  */
 void Matrix::GetColdMatrix(matrix_t matrix)
 {
@@ -116,43 +116,42 @@ void Matrix::GetColdMatrix(matrix_t matrix)
 /**
  * @brief Заполняет переданный указатель матрицей повторяемости в теплое время года
  * @param matrix Указатель на трехмерный массив
- * @warning Пользователь должен убедиться, что выделил достаточно места (поле size).
  */
 void Matrix::GetWarmMatrix(matrix_t matrix)
 {
     /* code, copying the _mWarm to matrix */
 }
 
-bool Matrix::_CheckIfAdded(observation_t observation)
+bool Matrix::_CheckIfAdded()
 {
     /* code, checking if observation is already in _observations */
     return false;
 }
 
-int Matrix::_CalcN(meteorology::compPoint_t windDir)
+int Matrix::_CalcN()
 {
     /* code, returning index, corresponding to the windDir */
     return 0;
 }
 
-int Matrix::_CalcJ(meteorology::smithParam_t smithParam)
+int Matrix::_CalcJ()
 {
     /* code, returning index, corresponding to the smithParam */
     return 0;
 }
 
-int Matrix::_CalcK(double windSpeed)
+int Matrix::_CalcK()
 {
     /* code, returning index, corresponding to the windSpeed */
     return 0;
 }
 
-void Matrix::_CheckConsistency(double windSpeed, meteorology::smithParam_t smithParam)
+void Matrix::_CheckConsistency()
 {
     /* code, checking if there id no conflict between windSpeed and smithParam values */
 }
 
-void Matrix::_Normalize(meteorology::unnormMatrix_t unnormalized, meteorology::matrix_t normalized)
+void Matrix::_Normalize()
 {
     /* coding, converting unnormalized matrix to normalized */
 }

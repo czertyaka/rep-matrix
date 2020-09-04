@@ -9,7 +9,7 @@
 
 int main()
 {
-
+/*
     double latitude = 56.833;
     double longitude = 60.583;
     int day = 16;
@@ -37,6 +37,8 @@ int main()
     );
 
     meteorology::smithParam_t smithParam = stabilityCathegory.GetSmithParam();
+*/
+    Matrix matrix;
 
     return 0;
 }

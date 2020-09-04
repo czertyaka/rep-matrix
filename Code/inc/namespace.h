@@ -1,14 +1,36 @@
 #ifndef _NAMESPACE_H_
 #define _NAMESPACE_H_
 
+#include <cstddef>
+
 namespace meteorology
 {
-    const int n = 16; ///< Количество интервалов направления ветра
-    const int j = 7; ///< Количество интервалов категорий устойчивости атмосферы
-    const int k = 8; ///< Количество интервалов скорости ветра
+    struct matrix_t
+    {
+        static const int N = 16; ///< Количество интервалов направления ветра
+        static const int J = 7; ///< Количество интервалов категорий устойчивости атмосферы
+        static const int K = 8; ///< Количество интервалов скорости ветра
 
-    using unnormMatrix_t = int[n][j][k];
-    using matrix_t = double[n][j][k] ;
+        int mCold[N][J][K] = {0};
+        int mWarm[N][J][K] = {0};
+        double wCold[N][J][K] = {0};
+        double wWarm[N][J][K] = {0};
+
+        matrix_t() {};
+        matrix_t(const matrix_t& copy)
+        {
+            for (std::size_t n = 0; n < N; n++) {
+                for (std::size_t j = 0; j < J; j++) {
+                    for (std::size_t k = 0; k < K; k++) {
+                        mCold[n][j][k] = copy.mCold[n][j][k];
+                        mWarm[n][j][k] = copy.mWarm[n][j][k];
+                        wCold[n][j][k] = copy.wCold[n][j][k];
+                        wWarm[n][j][k] = copy.wWarm[n][j][k];
+                    }
+                }
+            }
+        };
+    };
 
     enum compPoint_t : const int
     {

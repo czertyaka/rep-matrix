@@ -6,152 +6,58 @@
  */
 
 #include "matrix.h"
+#include "csv.h"
 
 using namespace meteorology;
+using namespace std;
+using namespace io;
 
-/**
- * @brief Construct a new Matrix:: Matrix object
- * @details Инициазирует значения по умолчанию: номер измерений - нулем, а массив наблюдений - 
- * ссылкой на массив нулевой длины. В теле конструктора открывается база данных и заполняются 
- * массивы матриц повторяемости некой дефолтной матрицей. Дефолтная матрица в БД доступна только
- * на чтение. При этом соответсвующие ей журнал измерений _observation не заполняются - 
- * предполагается, что такой массив будет чрезмерно велик.
- */
-Matrix::Matrix()
+void Matrix::OpenRP5File(const char* rp5File)
 {
-    /* code opening DB and initializing the _wCold and _wWarm */
-}
+    string localTime;  // местное время
+    float  T;          // Температура воздуха на высоте 2 м над землей (град. Цельсия)
+    float  Po;         // атм. давление на уровне станции (мм. рт. ст.)
+    float  P;          // атм. давление риведенное к среднему уровню моря (мм. рт. ст.)
+    float  Pa;         // барическая тенденция за последние три часа (мм. рт. ст.)
+    float  U;          // отн. влажность на высоте 2 м от пов. земли (%)
+    string DD;         // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
+    float  Ff;         // скорость ветра на высоте 10-12 м уср. за 10 мин до наблюдения (м/с)
+    float  ff10;       // макс. знач. порыва ветра на высоте 10-12 м за 10 мин до наблюдения (м/с)
+    float  ff3;        // макс. знач. порыва ветра на высоте 10-12 м за период между сроками (м/с)
+    string N;          // общая облачность (%)
+    string WW;         // текущая погода, сообщаемая с метеостанции
+    string W1;         // прошедшая погода между сроками наблюдения 1
+    string W2;         // прошедшая погода между сроками наблюдения 2
+    float  Tn;         // мин. темп. за прошедший период (град. Цельсия)
+    float  Tx;         // макс. темп. за прошедший период (град. Цельсия)
+    string Cl;         // слоисто-кучевые, слоистые, кучевые и кучево-дождевые облака
+    string Nh;         // кол-во всех наблюдавшихся Cl (если их нет, кол-во Cm)
+    string H;          // высота основания самых низких облаков (м)
+    string Cm;         // высококучевые, высокослоистые и слоисто-дождевые облака
+    string Ch;         // перистые, перисто-кучевые и перисто-слоистые облака
+    float  VV;         // горизонатльная дальность видимости (км)
+    float  Td;         // темп. точки росы на высоте 2 м над землей (град. Цельсия)
+    string RRR;        //кол-вы выпавших осадков (мм)
+    float  tR;         // период времени, за которое накопились осадки
+    string E;          // состояние поверхности почвы без снега или измеримого снежного покрова
+    float  Tg;         // мин. темп. поверхности почвы за ночь
+    string EWithSnow;  // состояние поверхности почвы со снегом или измеримым снежным покровом
+    float    sss;        // высота снежного покрова (см)
 
-/**
- * @brief Открывает данные из БД
- * @details В БД ищется единица данных "холодная матрица, теплая матрицы, измерения", заполняются
- * массивы _wCold и _wWarm, выделяется память под измерения.
- * @param name Имя единицы данных "холодная матрица, теплая матрицы, измерения"
- * @warning Необходима проверка, насколько хорошо будет работать выделение памяти из кучи для
- * больших массивов измерений.
- */
-void Matrix::OpenMatrix(const char* name)
-{
-    /* code, filling the _wCold and _wWarm, getting number of observations and memory allocationg
-    for observations */
-}
-
-/**
- * @brief Сохраняет данные в БД
- * @details В БД создается (если нужно) единица данных "холодная матрица, теплая матрицы, 
- * измерения", в которую сохраняются текущие данные в полях _wCold, _wWarm и _observation
- * @param name Имя единицы данных "холодная матрица, теплая матрицы, измерения"
- * @warning Метод НЕ должен использоваться для сохранения под именем $default - будет добавлено
- * исключение.
- */
-void Matrix::SaveMatrix(const char* name)
-{
-    /* code checking if name != $default and saving the data to DB*/
-}
-
-/**
- * @brief Стирает матрицу и журнал измерений
- */
-void Matrix::ClearMatrix()
-{
-    /* code clearing _wCold, _wWarm, _obseravtion and setting _obsNumber = 0 */
-}
-
-/**
- * @brief Добавляет в матрицу единичное измерение
- * @param data Структура со всеми необходимыми для расчета данными
- */
-void Matrix::_AddObservation(observation_t observation)
-{
-    _currentObservation = observation;
-    _CheckConsistency();
-    bool isAlreadyAdded = _CheckIfAdded();
-
-    if (!isAlreadyAdded)
+    CSVReader<29, trim_chars<' ', '\t'>, double_quote_escape<';', '"'>, throw_on_overflow,
+              single_and_empty_line_comment<'#'> > in(rp5File);
+    in.read_header(ignore_extra_column, "Местное время в Аргаяше", "T", "Po", "P", "Pa", "U", "DD",
+                   "Ff", "ff10", "ff3", "N", "WW", "W1", "W2", "Tn", "Tx", "Cl", "Nh", "H", "Cm",
+                   "Ch", "VV", "Td", "RRR", "tR", "E", "Tg", "E'", "sss");
+    while(in.read_row(localTime, T, Po, P, Pa, U, DD,
+                   Ff, ff10, ff3, N, WW, W1, W2, Tn, Tx, Cl, Nh, H, Cm,
+                   Ch, VV, Td, RRR, tR, E, Tg, EWithSnow, sss))
     {
-        int n = _CalcN();
-        int j = _CalcJ();
-        int k = _CalcK();
-
-        switch (observation.month)
-        {
-        case meteorology::november:
-        case meteorology::december:
-        case meteorology::january:
-        case meteorology::february:
-        case meteorology::march:
-            _matrix.mCold[n][j][k]++;
-            _Normalize();
-            break;
-        default:
-            _matrix.mWarm[n][j][k]++;
-            _Normalize();
-            break;
-        }
+        // volatile int i = 0;
     }
 }
 
-/**
- * @brief Добавляет в матрицу измерения, содержащиеся в .CSV файле
- * @details Парсит .CSV файл и добавляет измерения из него (вызов AddObservation(meteoData_t data)).
- * @param filename Имя файла
- * @param path Путь до файла (при передаче значения по умолчанию = 0, поиск будет производитя в 
- * текущем каталоге)
- */
-
-void Matrix::AddObservationFromCsv(const char* filename, const char* path/* = 0*/)
+matrix_t Matrix::GetMatrix()
 {
-    /* code, parsing file, and adding the observations */
-}
-
-/**
- * @brief Заполняет переданный указатель матрицей повторяемости в холодное время года
- * @param matrix Указатель на трехмерный массив
- */
-void Matrix::GetColdMatrix(matrix_t matrix)
-{
-    /* code, copying the _mCold to matrix */
-}
-
-/**
- * @brief Заполняет переданный указатель матрицей повторяемости в теплое время года
- * @param matrix Указатель на трехмерный массив
- */
-void Matrix::GetWarmMatrix(matrix_t matrix)
-{
-    /* code, copying the _mWarm to matrix */
-}
-
-bool Matrix::_CheckIfAdded()
-{
-    /* code, checking if observation is already in _observations */
-    return false;
-}
-
-int Matrix::_CalcN()
-{
-    /* code, returning index, corresponding to the windDir */
-    return 0;
-}
-
-int Matrix::_CalcJ()
-{
-    /* code, returning index, corresponding to the smithParam */
-    return 0;
-}
-
-int Matrix::_CalcK()
-{
-    /* code, returning index, corresponding to the windSpeed */
-    return 0;
-}
-
-void Matrix::_CheckConsistency()
-{
-    /* code, checking if there id no conflict between windSpeed and smithParam values */
-}
-
-void Matrix::_Normalize()
-{
-    /* coding, converting unnormalized matrix to normalized */
+    return _matrix;
 }

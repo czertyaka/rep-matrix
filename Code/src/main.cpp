@@ -9,36 +9,8 @@
 
 int main()
 {
-/*
-    double latitude = 56.833;
-    double longitude = 60.583;
-    int day = 16;
-    meteorology::month_t month = meteorology::january;
-    int year = 2020;
-    double time = 17.4556;
-    double windSpeed = 0;
-    int cloudAmount = 5;
-    int lowerCloudAmount = 3;
-    bool fog = false;
-    bool snow = true;
-
-    StabilityCathegory stabilityCathegory(
-        day,
-        month,
-        year,
-        time,
-        latitude,
-        longitude,
-        windSpeed,
-        cloudAmount,
-        lowerCloudAmount,
-        fog,
-        snow
-    );
-
-    meteorology::smithParam_t smithParam = stabilityCathegory.GetSmithParam();
-*/
     Matrix matrix;
+    matrix.OpenRP5File("/home/czert/workspace/rep-matrix/RP5-files/small-utf8.csv");
 
     return 0;
 }

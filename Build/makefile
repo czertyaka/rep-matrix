@@ -1,20 +1,22 @@
 .DEFAULT := all
 
 OBJ := main.o matrix.o stability_cathegory.o
+LIB := -lpthread
 INC_PATH := ../Code/inc
+PARSER_INC_PATH := ../Code/fast-cpp-csv-parser
 SRC_PATH := ../Code/src
 
 CC := g++
-CC_FLAGS := -g3
+CC_FLAGS := -std=c++0x -g3
 
 all: $(OBJ)
 	@echo "Linking..."
-	@$(CC) $(LINK_FLAGS) -o main $(OBJ)
+	@$(CC) $(LINK_FLAGS) -o main $(OBJ) $(LIB)
 	@echo "Done making."
 
 %.o: $(SRC_PATH)/%.cpp
 	@echo "Building $^.o..."
-	@$(CC) -c $(CC_FLAGS) -I$(INC_PATH) $^
+	@$(CC) -c $(CC_FLAGS) -I$(INC_PATH) -I$(PARSER_INC_PATH) $^
 
 clean:
 	@echo "..."

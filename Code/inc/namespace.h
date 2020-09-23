@@ -1,55 +1,28 @@
-#ifndef _NAMESPACE_H_
-#define _NAMESPACE_H_
+#pragma once
 
 #include <cstddef>
 
 namespace meteorology
 {
-    struct matrix_t
+    enum windDir_t : const int
     {
-        static const int N = 16; ///< Количество интервалов направления ветра
-        static const int J = 7; ///< Количество интервалов категорий устойчивости атмосферы
-        static const int K = 8; ///< Количество интервалов скорости ветра
-
-        int mCold[N][J][K] = {0};
-        int mWarm[N][J][K] = {0};
-        double wCold[N][J][K] = {0};
-        double wWarm[N][J][K] = {0};
-
-        matrix_t() {};
-        matrix_t(const matrix_t& copy)
-        {
-            for (std::size_t n = 0; n < N; n++) {
-                for (std::size_t j = 0; j < J; j++) {
-                    for (std::size_t k = 0; k < K; k++) {
-                        mCold[n][j][k] = copy.mCold[n][j][k];
-                        mWarm[n][j][k] = copy.mWarm[n][j][k];
-                        wCold[n][j][k] = copy.wCold[n][j][k];
-                        wWarm[n][j][k] = copy.wWarm[n][j][k];
-                    }
-                }
-            }
-        };
-    };
-
-    enum compPoint_t : const int
-    {
-        N   = 0,
-        NNE = 1,
-        NE  = 2,
-        ENE = 3,
-        E   = 4,
-        ESE = 5,
-        SE  = 6,
-        SSE = 7,
-        S   = 8,
-        SSW = 9,
-        SW  = 10,
-        WSW = 11,
-        W   = 12,
-        WNW = 13,
-        NW  = 14,
-        NNW = 15
+        calm = 0,
+        N    = 1,
+        NNE  = 2,
+        NE   = 3,
+        ENE  = 4,
+        E    = 5,
+        ESE  = 6,
+        SE   = 7,
+        SSE  = 8,
+        S    = 9,
+        SSW  = 10,
+        SW   = 11,
+        WSW  = 12,
+        W    = 13,
+        WNW  = 14,
+        NW   = 15,
+        NNW  = 16
     };
 
     enum month_t : const int
@@ -84,12 +57,45 @@ namespace meteorology
         int day; ///< день
         month_t month; ///< месяц
         int year; ///< год
-        double time; ///< гринвичевское время
+        int time; ///< гринвичевское время
 
-        compPoint_t windDir; ///< направление ветра, румб
+        double latitude; ///< широта, град.
+        double longitude; ///< долгота, град.
+
+        windDir_t windDir; ///< направление ветра, румб
         smithParam_t smithParam; ///< параметр Смита (категория устойчивости атмосферы)
         double windSpeed; ///< скорость ветра, м/с
+
+        int cloudAmount; ///< балл общей облачности, от 0 до 10
+        int lowerCloudAmount; ///< балл нижней облачности, от 0 до 10
+        bool fog; ///< наличие тумана
+        bool snow; ///< наличие сплошного снежного покрова
+    };
+
+    struct matrix_t
+    {
+        static const int N = 16; ///< Количество интервалов направления ветра
+        static const int J = 7; ///< Количество интервалов категорий устойчивости атмосферы
+        static const int K = 8; ///< Количество интервалов скорости ветра
+
+        int mCold[N][J][K] = {0};
+        int mWarm[N][J][K] = {0};
+        double wCold[N][J][K] = {0};
+        double wWarm[N][J][K] = {0};
+
+        matrix_t() {};
+        matrix_t(const matrix_t& copy)
+        {
+            for (std::size_t n = 0; n < N; n++) {
+                for (std::size_t j = 0; j < J; j++) {
+                    for (std::size_t k = 0; k < K; k++) {
+                        mCold[n][j][k] = copy.mCold[n][j][k];
+                        mWarm[n][j][k] = copy.mWarm[n][j][k];
+                        wCold[n][j][k] = copy.wCold[n][j][k];
+                        wWarm[n][j][k] = copy.wWarm[n][j][k];
+                    }
+                }
+            }
+        };
     };
 }
-
-#endif /* _NAMESPACE_H */

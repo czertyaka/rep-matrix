@@ -9,8 +9,7 @@
 
 int main()
 {
-    Matrix matrix;
-    matrix.OpenRP5File("/home/czert/workspace/rep-matrix/RP5-files/small-utf8.csv");
+    Matrix matrix("/home/czert/workspace/rep-matrix/RP5-files/big-utf-8.csv", 55.6971868, 60.8041044);
 
     return 0;
 }

@@ -8,32 +8,22 @@
 #include <cmath>
 #include "stability_cathegory.h"
 
+using namespace meteorology;
+
 double DegToRad(double degree) { return degree / 180 *M_PI; }
 
-StabilityCathegory::StabilityCathegory(
-    int day,
-    meteorology::month_t month,
-    int year,
-    double time,
-    double latitude,
-    double longitude,
-    double windSpeed,
-    int cloudAmount,
-    int lowerCloudAmount,
-    bool fog,
-    bool snow
-):
-    _day(day),
-    _month(month),
-    _year(year),
-    _time(time),
-    _latitude(latitude),
-    _longitude(longitude),
-    _windSpeed(windSpeed),
-    _cloudAmount(cloudAmount),
-    _lowerCloudAmount(lowerCloudAmount),
-    _fog(fog),
-    _snow(snow)
+StabilityCathegory::StabilityCathegory(observation_t& observation):
+    _day(observation.day),
+    _month(observation.month),
+    _year(observation.year),
+    _time(observation.time),
+    _latitude(observation.latitude),
+    _longitude(observation.longitude),
+    _windSpeed(observation.windSpeed),
+    _cloudAmount(observation.cloudAmount),
+    _lowerCloudAmount(observation.lowerCloudAmount),
+    _fog(observation.fog),
+    _snow(observation.snow)
 {
     _CalcSmithParam();
 }

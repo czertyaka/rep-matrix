@@ -1,5 +1,4 @@
-#ifndef _STAB_CATH_H_
-#define _STAB_CATH_H_
+#pragma once
 
 #include "namespace.h"
 
@@ -8,11 +7,7 @@ class StabilityCathegory
 
 public:
 
-    StabilityCathegory(int day, meteorology::month_t month, int year, double time,
-                       double latitude, double longitude,
-                       double windSpeed,
-                       int cloudAmount, int lowerCloudAmount,
-                       bool fog, bool snow);
+    StabilityCathegory(meteorology::observation_t& observation);
 
     meteorology::smithParam_t GetSmithParam();
 
@@ -44,8 +39,8 @@ private:
     double _latitude; ///< широта, град.
     double _longitude; ///< долгота, град.
     double _windSpeed; ///< скорость ветра, м/с
-    int _cloudAmount; ///< балл общей облачности, от 1 до 10
-    int _lowerCloudAmount; ///< балл нижней облачности, от 1 до 10
+    int _cloudAmount; ///< балл общей облачности, от 0 до 10
+    int _lowerCloudAmount; ///< балл нижней облачности, от 0 до 10
     bool _fog; ///< наличие тумана
     bool _snow; ///< наличие сплошного снежного покрова
 
@@ -55,5 +50,3 @@ private:
     double _sunAngle; ///< высота солнца, град.
     int _insolClass; ///< класс инсоляции
 };
-
-#endif /* _STAB_CATH_H_ */

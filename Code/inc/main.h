@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <iostream>
+#include <fstream>
 #include "namespace.h"
 #include "smith_param_calculator.h"
 #include "matrix_calculator.h"

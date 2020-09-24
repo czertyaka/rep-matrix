@@ -82,6 +82,13 @@ void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double 
     }
 
     _NormalizeMatrix();
+    _CalcWindRose();
+    _CalcWindSpeedRepeatabilityByCompPoint();
+    _CalcWindSpeedRepeatability();
+    _CalcCalmRepeatability();
+    _CalcSmithParamRepeatability();
+    _CalcAverageWindSpeedByCompPoint();
+    _CalcAverageWindSpeedBySmithParam();
 }
 
 void MatrixCalculator::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
@@ -323,4 +330,134 @@ void MatrixCalculator::_NormalizeMatrix()
         cerr << "Проверка нормированности теплой матрицы не сходится. Сумма элементов: "
              << wWarmSum << endl;
     }
+}
+
+void MatrixCalculator::_CalcWindRose()
+{
+    for (size_t n = 0; n < _matrix.N; n++) {
+
+        // calc sums
+        int sumCold = 0;
+        int sumWarm = 0;
+        for (size_t j = 0; j < _matrix.J; j++) {
+            for (size_t k = 1; k < _matrix.K; k++) {
+                sumCold += _matrix.mCold[n][j][k];
+                sumWarm += _matrix.mWarm[n][j][k];
+            }  
+        }
+
+        // calc rose
+        _matrix.windRoseCold[n] = static_cast<double>(sumCold) /
+                                  static_cast<double>(_matrix.MColdNoCalm);
+        _matrix.windRoseWarm[n] = static_cast<double>(sumWarm) /
+                                  static_cast<double>(_matrix.MWarmNoCalm);
+    }
+}
+
+void MatrixCalculator::_CalcWindSpeedRepeatabilityByCompPoint()
+{
+    for (size_t n = 0; n < _matrix.N; n++) {
+        for (size_t k = 0; k < _matrix.K; k++) {
+            
+            // calc sums
+            int sumCold = 0;
+            int sumWarm = 0;
+            for (size_t j = 0; j < _matrix.J; j++) {
+                sumCold += _matrix.mCold[n][j][k];
+                sumWarm += _matrix.mWarm[n][j][k];
+            }
+
+            // calc reps
+            _matrix.windSpRepByCPCold[n][k] = static_cast<double>(sumCold) /
+                                              static_cast<double>(_matrix.MCold);
+            _matrix.windSpRepByCPWarm[n][k] = static_cast<double>(sumWarm) /
+                                              static_cast<double>(_matrix.MWarm);
+        }
+    }
+}
+
+void MatrixCalculator::_CalcWindSpeedRepeatability()
+{
+    for (size_t k = 0; k < _matrix.K; k++) {
+        
+        _matrix.windSpRepCold[k] = 0;
+        _matrix.windSpRepWarm[k] = 0;
+
+        for (size_t n = 0; n < _matrix.N; n++) {
+            
+            _matrix.windSpRepCold[k] += _matrix.windSpRepByCPCold[n][k];
+            _matrix.windSpRepWarm[k] += _matrix.windSpRepByCPWarm[n][k];
+        }
+    }
+}
+
+void MatrixCalculator::_CalcCalmRepeatability()
+{
+    _matrix.calmRepCold = _matrix.windSpRepByCPCold[0][0];    
+    _matrix.calmRepWarm = _matrix.windSpRepByCPWarm[0][0];
+}
+
+void MatrixCalculator::_CalcSmithParamRepeatability()
+{
+    for (size_t j = 0; j < _matrix.J; j++) {
+        
+        // cals sums
+        int sumCold = 0;
+        int sumWarm = 0;
+        for (size_t n = 0; n < _matrix.N; n++) {
+            for (size_t k = 0; k < _matrix.K; k++) {
+                sumCold += _matrix.mCold[n][j][k];
+                sumWarm += _matrix.mWarm[n][j][k];
+            }
+        }
+
+        // calc reps
+        _matrix.smithParamRepCold[j] = static_cast<double>(sumCold) /
+                                       static_cast<double>(_matrix.MCold);
+        _matrix.smithParamRepWarm[j] = static_cast<double>(sumWarm) /
+                                       static_cast<double>(_matrix.MWarm);
+    }
+    
+}
+
+void MatrixCalculator::_CalcAverageWindSpeedByCompPoint()
+{
+    double avSpeed[_matrix.K] = { 0.5, 1, 2, 3, 4.5, 6.5, 9, 12 };
+
+    for (size_t n = 0; n < _matrix.N; n++) {
+        
+        // calc sums
+        int sumCold = 0;
+        int sumWarm = 0;
+        for (size_t k = 0; k < _matrix.K; k++) {
+            for (size_t j = 0; j < _matrix.J; j++) {
+                sumCold += _matrix.mCold[n][j][k] * _matrix.windSpeedVals[k];
+                sumWarm += _matrix.mWarm[n][j][k] * _matrix.windSpeedVals[k];
+            }
+        }
+
+        // calc speeds
+        _matrix.avWindSpByCPCold[n] = static_cast<double>(sumCold) / static_cast<double>(_matrix.MCold) ;
+        _matrix.avWindSpByCPWarm[n] = static_cast<double>(sumWarm) / static_cast<double>(_matrix.MWarm) ;
+    } 
+}
+
+void MatrixCalculator::_CalcAverageWindSpeedBySmithParam()
+{
+    for (size_t j = 0; j < _matrix.J; j++) {
+        
+        // calc sums
+        int sumCold = 0;
+        int sumWarm = 0;
+        for (size_t k = 0; k < _matrix.K; k++) {
+            for (size_t n = 0; n < _matrix.N; n++) {
+                sumCold += _matrix.mCold[n][j][k] * _matrix.windSpeedVals[k];
+                sumWarm += _matrix.mWarm[n][j][k] * _matrix.windSpeedVals[k];
+            }
+        }
+
+        // calc speeds
+        _matrix.avWindSpBySPCold[j] = static_cast<double>(sumCold) / static_cast<double>(_matrix.MCold) ;
+        _matrix.avWindSpBySPWarm[j] = static_cast<double>(sumWarm) / static_cast<double>(_matrix.MWarm) ;
+    } 
 }

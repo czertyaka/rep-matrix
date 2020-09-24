@@ -37,6 +37,13 @@ private:
     int _CalcN(meteorology::windDir_t windDir_t);
 
     void _NormalizeMatrix();
+    void _CalcWindRose();
+    void _CalcWindSpeedRepeatabilityByCompPoint();
+    void _CalcWindSpeedRepeatability();
+    void _CalcCalmRepeatability();
+    void _CalcSmithParamRepeatability();
+    void _CalcAverageWindSpeedByCompPoint();
+    void _CalcAverageWindSpeedBySmithParam();
 
     meteorology::matrix_t& _matrix;
 };

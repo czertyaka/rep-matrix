@@ -1,28 +1,25 @@
 /**
- * @file matrix.cpp
+ * @file MatrixCalculator.cpp
  * @author czertyaka
  * @date 2020-08-10
- * @brief Реализация методов Matrix
+ * @brief Реализация методов MatrixCalculator
  */
 
 #include "csv.h"
-#include "matrix.h"
+#include "matrix_calculator.h"
 
 using namespace std;
 using namespace io;
 using namespace meteorology;
 
-Matrix::Matrix(const char* rp5File, double latitude, double longitude)
+MatrixCalculator::MatrixCalculator(matrix_t& matrix, const char* rp5File,
+                                   double latitude, double longitude) :
+                                   _matrix(matrix)
 {
     _CalcMatrix(rp5File, latitude, longitude);
 }
 
-matrix_t Matrix::GetMatrix()
-{
-    return _matrix;
-}
-
-void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
+void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double longitude)
 {
     string localTime;   // местное время
     string DD;          // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
@@ -78,8 +75,7 @@ void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
         observation.snow = _ParseSnow(E1, E2);
 
         // calculate smith parameter
-        StabilityCathegory smithParam(observation);
-        observation.smithParam = smithParam.GetSmithParam();
+        SmithParamCalculator smithParamCalculator(observation);
 
         // and finally...
         _AddObservation(observation);
@@ -88,7 +84,7 @@ void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
     _NormalizeMatrix();
 }
 
-void Matrix::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
+void MatrixCalculator::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
 {
     const char* cLocalTime = localTime.c_str();
     const char* format;
@@ -99,17 +95,17 @@ void Matrix::_ParseTime(string localTime, int& day, month_t& month, int& year, i
     sscanf(cLocalTime, format, &day, reinterpret_cast<int*>(&month), &year, &time);
 }
 
-double Matrix::_ParseTemper(string T)
+double MatrixCalculator::_ParseTemper(string T)
 {
     return stod(T);
 }
 
-double Matrix::_ParseWindSpeed(std::string Ff)
+double MatrixCalculator::_ParseWindSpeed(std::string Ff)
 {
     return stod(Ff);
 }
 
-windDir_t Matrix::_ParseWindDir(string DD)
+windDir_t MatrixCalculator::_ParseWindDir(string DD)
 {
     windDir_t windDir;
 
@@ -139,7 +135,7 @@ windDir_t Matrix::_ParseWindDir(string DD)
     return windDir;
 }
 
-int Matrix::_ParseCloudAmount(string N)
+int MatrixCalculator::_ParseCloudAmount(string N)
 {
     int cloudAmount;
     
@@ -160,13 +156,13 @@ int Matrix::_ParseCloudAmount(string N)
     return cloudAmount;
 }
 
-bool Matrix::_ParseFog(std::string VV)
+bool MatrixCalculator::_ParseFog(std::string VV)
 {
     if (VV == "менее 0.05") { return true; }
     return stod(VV) < 1 ? true : false;
 }
 
-bool Matrix::_ParseSnow(string E1, string E2)
+bool MatrixCalculator::_ParseSnow(string E1, string E2)
 {
     return (
         E2 != "Неровный слой слежавшегося или мокрого снега покрывает почву полностью." &&
@@ -177,17 +173,25 @@ bool Matrix::_ParseSnow(string E1, string E2)
         ) ? false : true;
 }
 
-void Matrix::_AddObservation(observation_t observation)
+void MatrixCalculator::_AddObservation(observation_t observation)
 {
     int j = _CalcJ(observation.smithParam);
     int k = _CalcK(observation.windSpeed);
     int n = _CalcN(observation.windDir);
 
-    if (observation.temper > 0) { _matrix.mCold[n][j][k]++; }
-    else                        { _matrix.mWarm[n][j][k]++; }
+    if (observation.temper > 0) {
+        _matrix.mCold[n][j][k]++;
+        _matrix.MCold++;
+        if (k != 0) { _matrix.MColdNoCalm++; }
+    }
+    else {
+        _matrix.mWarm[n][j][k]++;
+        _matrix.MWarm++;
+        if (k != 0) { _matrix.MWarmNoCalm++; }
+    }
 }
 
-int Matrix::_CalcJ(smithParam_t smithParam)
+int MatrixCalculator::_CalcJ(smithParam_t smithParam)
 {
     switch (smithParam)
     {
@@ -206,7 +210,7 @@ int Matrix::_CalcJ(smithParam_t smithParam)
     return 0;
 }
 
-int Matrix::_CalcK(double windSpeed)
+int MatrixCalculator::_CalcK(double windSpeed)
 {
     if (windSpeed < 0) {
         cerr << "Отрицательная скорость ветра: " << windSpeed << " м/с." << endl;
@@ -224,7 +228,7 @@ int Matrix::_CalcK(double windSpeed)
     return 0;
 }
 
-int Matrix::_CalcN(windDir_t windDir)
+int MatrixCalculator::_CalcN(windDir_t windDir)
 {
     switch (windDir)
     {
@@ -253,27 +257,16 @@ int Matrix::_CalcN(windDir_t windDir)
     return 0;
 }
 
-void Matrix::_NormalizeMatrix()
+void MatrixCalculator::_NormalizeMatrix()
 {
-    int MCold = 0;
-    int MWarm = 0;
-    for (std::size_t n = 0; n < _matrix.N; n++) {
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            for (std::size_t k = 0; k < _matrix.K; k++) {
-                MCold += _matrix.mCold[n][j][k];
-                MWarm += _matrix.mWarm[n][j][k];
-            }
-        }
-    }
-
     // нормирование для элементов с k > 0
     for (std::size_t n = 0; n < _matrix.N; n++) {
         for (std::size_t j = 0; j < _matrix.J; j++) {
             for (std::size_t k = 1; k < _matrix.K; k++) {
                 _matrix.wCold[n][j][k] = static_cast<double>(_matrix.mCold[n][j][k]) /
-                                         static_cast<double>(MCold);
+                                         static_cast<double>(_matrix.MCold);
                 _matrix.wWarm[n][j][k] = static_cast<double>(_matrix.mWarm[n][j][k]) /
-                                         static_cast<double>(MWarm);
+                                         static_cast<double>(_matrix.MWarm);
             }
         }
     }
@@ -299,11 +292,11 @@ void Matrix::_NormalizeMatrix()
 
         for (std::size_t j = 0; j < _matrix.J; j++) {
             _matrix.wCold[n][j][0] = static_cast<double>(_matrix.mCold[0][j][0]) /
-                                     static_cast<double>(MCold) *
+                                     static_cast<double>(_matrix.MCold) *
                                      static_cast<double>(sum1Cold) /
                                      static_cast<double>(sum2Cold);
             _matrix.wWarm[n][j][0] = static_cast<double>(_matrix.mWarm[0][j][0]) /
-                                     static_cast<double>(MWarm) *
+                                     static_cast<double>(_matrix.MWarm) *
                                      static_cast<double>(sum1Warm) /
                                      static_cast<double>(sum2Warm);
         }

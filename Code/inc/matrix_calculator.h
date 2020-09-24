@@ -8,17 +8,15 @@
 
 #include <iostream>
 #include "namespace.h"
-#include "stability_cathegory.h"
+#include "smith_param_calculator.h"
 
-class Matrix
+class MatrixCalculator
 {
 
 public:
 
-    Matrix(const char* rp5File, double latitude, double longitude);
-    ~Matrix() = default;
-
-    meteorology::matrix_t GetMatrix();
+    MatrixCalculator(meteorology::matrix_t& matrix, const char* rp5File, double latitude,
+                    double longitude);
 
 private:
 
@@ -40,5 +38,5 @@ private:
 
     void _NormalizeMatrix();
 
-    meteorology::matrix_t _matrix;
+    meteorology::matrix_t& _matrix;
 };

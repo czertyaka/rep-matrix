@@ -85,19 +85,9 @@ namespace meteorology
         double wCold[N][J][K] = {0}; ///< нормированная матрица холодного времени года
         double wWarm[N][J][K] = {0}; ///< нормированная матрица теплого времени года
 
-        matrix_t() {};
-        matrix_t(const matrix_t& copy)
-        {
-            for (std::size_t n = 0; n < N; n++) {
-                for (std::size_t j = 0; j < J; j++) {
-                    for (std::size_t k = 0; k < K; k++) {
-                        mCold[n][j][k] = copy.mCold[n][j][k];
-                        mWarm[n][j][k] = copy.mWarm[n][j][k];
-                        wCold[n][j][k] = copy.wCold[n][j][k];
-                        wWarm[n][j][k] = copy.wWarm[n][j][k];
-                    }
-                }
-            }
-        };
+        int MCold = 0; ///< количество наблюдений в холодное время года
+        int MWarm = 0; ///< количество наблюдений в теплое время года
+        int MColdNoCalm = 0; ///< количество наблюдений в холодное время года без штилей
+        int MWarmNoCalm = 0; ///< количество наблюдений в теплое время года без штилей
     };
 }

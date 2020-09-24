@@ -8,5 +8,5 @@
 #pragma once
 
 #include "namespace.h"
-#include "stability_cathegory.h"
-#include "matrix.h"
+#include "smith_param_calculator.h"
+#include "matrix_calculator.h"

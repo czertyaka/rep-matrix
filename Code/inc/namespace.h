@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
 
 namespace meteorology
 {
@@ -82,7 +83,7 @@ namespace meteorology
 
         const double windDirVals[N] = {0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225,
                                        247.5, 270, 292.5, 315, 337.5};
-        const smithParam_t smithParamVals[J] = {cathA, cathB, cathC, cathD, cathE, cathF, cathG};
+        const std::string smithParamVals[J] = {"A", "B", "C", "D", "E", "F", "G"};
         const double windSpeedVals[K] = { 0.5, 1, 2, 3, 4.5, 6.5, 9, 12 };
 
         int mCold[N][J][K] = {0}; ///< ненормированная матрица холодного времени года

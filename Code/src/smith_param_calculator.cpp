@@ -145,7 +145,7 @@ void SmithParamCalculator::_CalcSmithParam()
 
 void SmithParamCalculator::_CalcSunAngle()
 {
-    double hourAngle = M_PI * ( _obs.time / 12 - 1 );
+    double hourAngle = M_PI * ( static_cast<double>(_obs.time) / 12.0 - 1 );
     double sunAngleSin = sin(_sunDecl) * sin(DegToRad(_obs.latitude)) +
                          cos(_sunDecl) * cos(DegToRad(_obs.latitude)) *
                          cos(hourAngle);

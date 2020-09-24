@@ -18,6 +18,9 @@ public:
     MatrixCalculator(meteorology::matrix_t& matrix, const char* rp5File, double latitude,
                     double longitude);
 
+    void DataOStream();
+    void DataOStream(std::ostream& o);
+
 private:
 
     void _CalcMatrix(const char* rp5File, double latitude, double longitude);
@@ -36,6 +39,7 @@ private:
     int _CalcK(double windSpeed);
     int _CalcN(meteorology::windDir_t windDir_t);
 
+    // расчетные методы
     void _NormalizeMatrix();
     void _CalcWindRose();
     void _CalcWindSpeedRepeatabilityByCompPoint();
@@ -44,6 +48,14 @@ private:
     void _CalcSmithParamRepeatability();
     void _CalcAverageWindSpeedByCompPoint();
     void _CalcAverageWindSpeedBySmithParam();
+
+    // методы потокового вывода данных
+    void _oStreamWindRose(std::ostream& o);
+    void _oStreamWindSpeedRepeatability(std::ostream& o);
+    void _oStreamCalmRepeatability(std::ostream& o);
+    void _oStreamSmithParamRepeatability(std::ostream& o);
+    void _oStreamAverageWindSpeedByCompPoint(std::ostream& o);
+    void _oStreamAverageWindSpeedBySmithParam(std::ostream& o);
 
     meteorology::matrix_t& _matrix;
 };

@@ -6,6 +6,7 @@
  */
 
 #include "csv.h"
+#include <fstream>
 #include "matrix_calculator.h"
 
 using namespace std;
@@ -17,6 +18,44 @@ MatrixCalculator::MatrixCalculator(matrix_t& matrix, const char* rp5File,
                                    _matrix(matrix)
 {
     _CalcMatrix(rp5File, latitude, longitude);
+}
+
+void MatrixCalculator::DataOStream()
+{
+   ofstream fout;
+   fout.open("../Output/Роза ветров.csv");
+   _oStreamWindRose(fout);
+   fout.close();
+   fout.open("../Output/Повторяемость модуля скорости ветра по градации k.csv");
+   _oStreamWindSpeedRepeatability(fout);
+   fout.close();
+   fout.open("../Output/Повторяемость штилей.csv");
+   _oStreamCalmRepeatability(fout);
+   fout.close();
+   fout.open("../Output/Повторяемость категорий устойчивости.csv");
+   _oStreamSmithParamRepeatability(fout);
+   fout.close();
+   fout.open("../Output/Приземная средняя скорость ветра n−го румба.csv");
+   _oStreamAverageWindSpeedByCompPoint(fout);
+   fout.close();
+   fout.open("../Output/Приземная средняя скорость ветра при j−ой категории устойчивости.csv");
+   _oStreamAverageWindSpeedBySmithParam(fout);
+   fout.close();
+}
+
+void MatrixCalculator::DataOStream(ostream& o)
+{
+    _oStreamWindRose(o);
+    o << endl;
+    _oStreamWindSpeedRepeatability(o);
+    o << endl;
+    _oStreamCalmRepeatability(o);
+    o << endl;
+    _oStreamSmithParamRepeatability(o);
+    o << endl;
+    _oStreamAverageWindSpeedByCompPoint(o);
+    o << endl;
+    _oStreamAverageWindSpeedBySmithParam(o);
 }
 
 void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double longitude)
@@ -460,4 +499,67 @@ void MatrixCalculator::_CalcAverageWindSpeedBySmithParam()
         _matrix.avWindSpBySPCold[j] = static_cast<double>(sumCold) / static_cast<double>(_matrix.MCold) ;
         _matrix.avWindSpBySPWarm[j] = static_cast<double>(sumWarm) / static_cast<double>(_matrix.MWarm) ;
     } 
+}
+
+void MatrixCalculator::_oStreamWindRose(ostream& o)
+{
+    o << "# повторяемость направлений ветра n −го румба (роза ветров)" << endl
+      << "\"Румб, град.\";\"Роза ветров в холодное время года\";\"Роза ветров в теплое время года\"" << endl;
+    for (size_t n = 0; n < _matrix.N; n++) {
+        o << "\"" << _matrix.windDirVals[n] << "\";\""
+          << _matrix.windRoseCold[n] << "\";\""
+          << _matrix.windRoseWarm[n] << "\"" << endl;
+    }
+}
+
+void MatrixCalculator::_oStreamWindSpeedRepeatability(ostream& o)
+{
+    o << "# повторяемость модуля скорости ветра по градации k " << endl
+      << "\"Cкорость ветра, м/с\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
+    for (size_t k = 0; k < _matrix.K; k++) {
+        o << "\"" << _matrix.windSpeedVals[k] << "\";\""
+          << _matrix.windSpRepCold[k] << "\";\""
+          << _matrix.windSpRepWarm[k] << "\"" << endl;
+    }
+}
+
+void MatrixCalculator::_oStreamCalmRepeatability(ostream& o)
+{
+    o << "# повторяемость штилей  " << endl
+      << "\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl
+      << "\"" << _matrix.calmRepCold << "\";\""
+      << "\"" << _matrix.calmRepCold << "\"" << endl; 
+}
+
+void MatrixCalculator::_oStreamSmithParamRepeatability(ostream& o)
+{
+    o << "# повторяемость категорий устойчивости " << endl
+      << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
+    for (size_t j = 0; j < _matrix.J; j++) {
+        o << "\"" << _matrix.smithParamVals[j] << "\";\""
+          << _matrix.smithParamRepCold[j] << "\";\""
+          << _matrix.smithParamRepWarm[j] << "\"" << endl;
+    }
+}
+
+void MatrixCalculator::_oStreamAverageWindSpeedByCompPoint(ostream& o)
+{
+    o << "# приземная средняя скорость ветра n−го румба " << endl
+      << "\"Румб, град.\";\"Скорость ветра в холодное время года, м/с\";\"Скорость ветра в теплое время года, м/с\"" << endl;
+    for (size_t n = 0; n < _matrix.N; n++) {
+        o << "\"" << _matrix.windDirVals[n] << "\";\""
+          << _matrix.avWindSpByCPCold[n] << "\";\""
+          << _matrix.avWindSpByCPWarm[n] << "\"" << endl;
+    }
+}
+
+void MatrixCalculator::_oStreamAverageWindSpeedBySmithParam(ostream& o)
+{
+    o << "# приземная средняя скорость ветра при j−ой категории устойчивости " << endl
+      << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
+    for (size_t j = 0; j < _matrix.J; j++) {
+        o << "\"" << _matrix.smithParamVals[j] << "\";\""
+          << _matrix.avWindSpBySPCold[j] << "\";\""
+          << _matrix.avWindSpBySPWarm[j] << "\"" << endl;
+    }
 }

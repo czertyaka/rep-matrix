@@ -26,6 +26,7 @@ private:
 
     void _ParseTime(std::string localTime, int& day, meteorology::month_t& month, int& year,
                    int& time);
+    double _ParseTemper(std::string T);
     double _ParseWindSpeed(std::string Ff);
     meteorology::windDir_t _ParseWindDir(std::string DD);
     int _ParseCloudAmount(std::string N);
@@ -40,6 +41,4 @@ private:
     void _NormalizeMatrix();
 
     meteorology::matrix_t _matrix;
-    int _observCounter;
-
 };

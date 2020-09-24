@@ -24,25 +24,26 @@ matrix_t Matrix::GetMatrix()
 
 void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
 {
-    string localTime;  // местное время
-    string DD;         // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
-    string Ff;         // скорость ветра на высоте 10-12 м уср. за 10 мин до наблюдения (м/с)
-    string N;          // общая облачность (%)
-    string Nh;         // кол-во всех наблюдавшихся Cl (если их нет, кол-во Cm)
-    string VV;         // горизонатльная дальность видимости (км)
-    string E1;         // состояние поверхности почвы без снега или измеримого ледяного покрова
-    string E2;         // состояние поверхности почвы со снегом или измеримым ледяным покровом
-    string prevE1 = "";
-    string prevE2 = "";
+    string localTime;   // местное время
+    string DD;          // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
+    string Ff;          // скорость ветра на высоте 10-12 м уср. за 10 мин до наблюдения (м/с)
+    string N;           // общая облачность (%)
+    string Nh;          // кол-во всех наблюдавшихся Cl (если их нет, кол-во Cm)
+    string VV;          // горизонатльная дальность видимости (км)
+    string E1;          // состояние поверхности почвы без снега или измеримого ледяного покрова
+    string E2;          // состояние поверхности почвы со снегом или измеримым ледяным покровом
+    string prevE1 = ""; 
+    string prevE2 = ""; 
+    string T;           // температура воздуха (град. Цельсия)
 
-    CSVReader<8, trim_chars<' ', '\t'>, double_quote_escape<';', '"'>, throw_on_overflow,
+    CSVReader<9, trim_chars<' ', '\t'>, double_quote_escape<';', '"'>, throw_on_overflow,
               single_and_empty_line_comment<'#'> > in(rp5File);
 
-    in.read_header(ignore_extra_column, "Местное время в Аргаяше", "DD", "Ff", "N", "Nh", "VV", "E",
-                   "E'");
+    in.read_header(ignore_extra_column, "Местное время в Аргаяше", "T", "DD", "Ff", "N", "Nh", "VV",
+                   "E", "E'");
 
     // loop reading .csv
-    while(in.read_row(localTime, DD, Ff, N, Nh, VV, E1, E2))
+    while(in.read_row(localTime, T, DD, Ff, N, Nh, VV, E1, E2))
     {
         // restore ground surface!
         E1 = E1.empty() ? prevE1 : E1;
@@ -53,7 +54,7 @@ void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
         // check if we need to skip this observation
         if (
             localTime.empty() || DD.empty() || Ff.empty() || N.empty() || Nh.empty() ||
-            VV.empty() ||
+            VV.empty() || T.empty() ||
             N == "Небо не видно из-за тумана и/или других метеорологических явлений." ||
             Nh == "Небо не видно из-за тумана и/или других метеорологических явлений." ||
             (E1.empty() && E2.empty())
@@ -68,6 +69,7 @@ void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
                    observation.year, observation.time);
         observation.latitude = latitude;
         observation.longitude = longitude;
+        observation.temper = _ParseTemper(T);
         observation.windDir = _ParseWindDir(DD);
         observation.windSpeed = _ParseWindSpeed(Ff);
         observation.cloudAmount = _ParseCloudAmount(N);
@@ -81,8 +83,6 @@ void Matrix::_CalcMatrix(const char* rp5File, double latitude, double longitude)
 
         // and finally...
         _AddObservation(observation);
-
-        _observCounter++;
     }
 
     _NormalizeMatrix();
@@ -97,6 +97,11 @@ void Matrix::_ParseTime(string localTime, int& day, month_t& month, int& year, i
     else if (cLocalTime[3] != '0' && cLocalTime[11] == '0') { format = "%2i.%2i.%4i 0%i:00"; }
     else if (cLocalTime[3] != '0' && cLocalTime[11] != '0') { format = "%2i.%2i.%4i %2i:00"; }
     sscanf(cLocalTime, format, &day, reinterpret_cast<int*>(&month), &year, &time);
+}
+
+double Matrix::_ParseTemper(string T)
+{
+    return stod(T);
 }
 
 double Matrix::_ParseWindSpeed(std::string Ff)
@@ -178,8 +183,8 @@ void Matrix::_AddObservation(observation_t observation)
     int k = _CalcK(observation.windSpeed);
     int n = _CalcN(observation.windDir);
 
-    if (observation.snow) { _matrix.mCold[n][j][k]++; }
-    else                  { _matrix.mWarm[n][j][k]++; }
+    if (observation.temper > 0) { _matrix.mCold[n][j][k]++; }
+    else                        { _matrix.mWarm[n][j][k]++; }
 }
 
 int Matrix::_CalcJ(smithParam_t smithParam)
@@ -250,5 +255,79 @@ int Matrix::_CalcN(windDir_t windDir)
 
 void Matrix::_NormalizeMatrix()
 {
+    int MCold = 0;
+    int MWarm = 0;
+    for (std::size_t n = 0; n < _matrix.N; n++) {
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            for (std::size_t k = 0; k < _matrix.K; k++) {
+                MCold += _matrix.mCold[n][j][k];
+                MWarm += _matrix.mWarm[n][j][k];
+            }
+        }
+    }
 
+    // нормирование для элементов с k > 0
+    for (std::size_t n = 0; n < _matrix.N; n++) {
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            for (std::size_t k = 1; k < _matrix.K; k++) {
+                _matrix.wCold[n][j][k] = static_cast<double>(_matrix.mCold[n][j][k]) /
+                                         static_cast<double>(MCold);
+                _matrix.wWarm[n][j][k] = static_cast<double>(_matrix.mWarm[n][j][k]) /
+                                         static_cast<double>(MWarm);
+            }
+        }
+    }
+
+    // нормирование для элементов с k = 0
+    int sum2Cold = 0;
+    int sum2Warm = 0;
+    for (std::size_t n = 0; n < _matrix.N; n++) {
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            sum2Cold += _matrix.mCold[n][j][1];
+            sum2Warm += _matrix.mWarm[n][j][1];
+        }
+    }
+    
+    for (std::size_t n = 0; n < _matrix.N; n++) {
+
+        int sum1Cold = 0;
+        int sum1Warm = 0;
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            sum1Cold += _matrix.mCold[n][j][1];
+            sum1Warm += _matrix.mWarm[n][j][1];
+        }
+
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            _matrix.wCold[n][j][0] = static_cast<double>(_matrix.mCold[0][j][0]) /
+                                     static_cast<double>(MCold) *
+                                     static_cast<double>(sum1Cold) /
+                                     static_cast<double>(sum2Cold);
+            _matrix.wWarm[n][j][0] = static_cast<double>(_matrix.mWarm[0][j][0]) /
+                                     static_cast<double>(MWarm) *
+                                     static_cast<double>(sum1Warm) /
+                                     static_cast<double>(sum2Warm);
+        }
+    }
+
+    // проверка нормированности
+    double wColdSum = 0;
+    double wWarmSum = 0;
+    for (std::size_t n = 0; n < _matrix.N; n++) {
+        for (std::size_t j = 0; j < _matrix.J; j++) {
+            for (std::size_t k = 0; k < _matrix.K; k++) {
+                wColdSum += _matrix.wCold[n][j][k];
+                wWarmSum += _matrix.wWarm[n][j][k];
+            }
+        }
+    }
+
+    if (abs(wColdSum - 1) > 0.0001) {
+        cerr << "Проверка нормированности холодной матрицы не сходится. Сумма элементов: "
+             << wColdSum << endl;
+    }
+    
+    if (abs(wWarmSum - 1) > 0.0001) {
+        cerr << "Проверка нормированности теплой матрицы не сходится. Сумма элементов: "
+             << wWarmSum << endl;
+    }
 }

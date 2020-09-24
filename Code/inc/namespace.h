@@ -70,6 +70,8 @@ namespace meteorology
         int lowerCloudAmount; ///< балл нижней облачности, от 0 до 10
         bool fog; ///< наличие тумана
         bool snow; ///< наличие сплошного снежного покрова
+
+        double temper; ///< температура, град. Цельсия
     };
 
     struct matrix_t
@@ -78,10 +80,10 @@ namespace meteorology
         static const int J = 7; ///< Количество интервалов категорий устойчивости атмосферы
         static const int K = 8; ///< Количество интервалов скорости ветра
 
-        int mCold[N][J][K] = {0};
-        int mWarm[N][J][K] = {0};
-        double wCold[N][J][K] = {0};
-        double wWarm[N][J][K] = {0};
+        int mCold[N][J][K] = {0}; ///< ненормированная матрица холодного времени года
+        int mWarm[N][J][K] = {0}; ///< ненормированная матрица теплого времени года
+        double wCold[N][J][K] = {0}; ///< нормированная матрица холодного времени года
+        double wWarm[N][J][K] = {0}; ///< нормированная матрица теплого времени года
 
         matrix_t() {};
         matrix_t(const matrix_t& copy)

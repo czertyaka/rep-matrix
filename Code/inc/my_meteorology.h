@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <iostream>
 
-namespace meteorology
+namespace mm
 {
     enum windDir_t : const int
     {

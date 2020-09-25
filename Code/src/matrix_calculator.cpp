@@ -1,8 +1,8 @@
 /**
- * @file MatrixCalculator.cpp
+ * @file Matrix_Calculator.cpp
  * @author czertyaka
  * @date 2020-08-10
- * @brief Реализация методов MatrixCalculator
+ * @brief Реализация методов Matrix_Calculator
  */
 
 #include "csv.h"
@@ -11,16 +11,16 @@
 
 using namespace std;
 using namespace io;
-using namespace meteorology;
+using namespace mm;
 
-MatrixCalculator::MatrixCalculator(matrix_t& matrix, const char* rp5File,
+Matrix_Calculator::Matrix_Calculator(matrix_t& matrix, const char* rp5File,
                                    double latitude, double longitude) :
                                    _matrix(matrix)
 {
     _CalcMatrix(rp5File, latitude, longitude);
 }
 
-void MatrixCalculator::DataOStream()
+void Matrix_Calculator::DataOStream()
 {
    ofstream fout;
    fout.open("../Output/Роза ветров.csv");
@@ -43,7 +43,7 @@ void MatrixCalculator::DataOStream()
    fout.close();
 }
 
-void MatrixCalculator::DataOStream(ostream& o)
+void Matrix_Calculator::DataOStream(ostream& o)
 {
     _oStreamWindRose(o);
     o << endl;
@@ -58,7 +58,7 @@ void MatrixCalculator::DataOStream(ostream& o)
     _oStreamAverageWindSpeedBySmithParam(o);
 }
 
-void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double longitude)
+void Matrix_Calculator::_CalcMatrix(const char* rp5File, double latitude, double longitude)
 {
     string localTime;   // местное время
     string DD;          // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
@@ -114,7 +114,7 @@ void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double 
         observation.snow = _ParseSnow(E1, E2);
 
         // calculate smith parameter
-        SmithParamCalculator smithParamCalculator(observation);
+        Smith_Param_Calculator smithParamCalculator(observation);
 
         // and finally...
         _AddObservation(observation);
@@ -130,7 +130,7 @@ void MatrixCalculator::_CalcMatrix(const char* rp5File, double latitude, double 
     _CalcAverageWindSpeedBySmithParam();
 }
 
-void MatrixCalculator::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
+void Matrix_Calculator::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
 {
     const char* cLocalTime = localTime.c_str();
     const char* format;
@@ -141,17 +141,17 @@ void MatrixCalculator::_ParseTime(string localTime, int& day, month_t& month, in
     sscanf(cLocalTime, format, &day, reinterpret_cast<int*>(&month), &year, &time);
 }
 
-double MatrixCalculator::_ParseTemper(string T)
+double Matrix_Calculator::_ParseTemper(string T)
 {
     return stod(T);
 }
 
-double MatrixCalculator::_ParseWindSpeed(std::string Ff)
+double Matrix_Calculator::_ParseWindSpeed(std::string Ff)
 {
     return stod(Ff);
 }
 
-windDir_t MatrixCalculator::_ParseWindDir(string DD)
+windDir_t Matrix_Calculator::_ParseWindDir(string DD)
 {
     windDir_t windDir;
 
@@ -181,7 +181,7 @@ windDir_t MatrixCalculator::_ParseWindDir(string DD)
     return windDir;
 }
 
-int MatrixCalculator::_ParseCloudAmount(string N)
+int Matrix_Calculator::_ParseCloudAmount(string N)
 {
     int cloudAmount;
     
@@ -202,13 +202,13 @@ int MatrixCalculator::_ParseCloudAmount(string N)
     return cloudAmount;
 }
 
-bool MatrixCalculator::_ParseFog(std::string VV)
+bool Matrix_Calculator::_ParseFog(std::string VV)
 {
     if (VV == "менее 0.05") { return true; }
     return stod(VV) < 1 ? true : false;
 }
 
-bool MatrixCalculator::_ParseSnow(string E1, string E2)
+bool Matrix_Calculator::_ParseSnow(string E1, string E2)
 {
     return (
         E2 != "Неровный слой слежавшегося или мокрого снега покрывает почву полностью." &&
@@ -219,7 +219,7 @@ bool MatrixCalculator::_ParseSnow(string E1, string E2)
         ) ? false : true;
 }
 
-void MatrixCalculator::_AddObservation(observation_t observation)
+void Matrix_Calculator::_AddObservation(observation_t observation)
 {
     int j = _CalcJ(observation.smithParam);
     int k = _CalcK(observation.windSpeed);
@@ -237,7 +237,7 @@ void MatrixCalculator::_AddObservation(observation_t observation)
     }
 }
 
-int MatrixCalculator::_CalcJ(smithParam_t smithParam)
+int Matrix_Calculator::_CalcJ(smithParam_t smithParam)
 {
     switch (smithParam)
     {
@@ -256,7 +256,7 @@ int MatrixCalculator::_CalcJ(smithParam_t smithParam)
     return 0;
 }
 
-int MatrixCalculator::_CalcK(double windSpeed)
+int Matrix_Calculator::_CalcK(double windSpeed)
 {
     if (windSpeed < 0) {
         cerr << "Отрицательная скорость ветра: " << windSpeed << " м/с." << endl;
@@ -274,7 +274,7 @@ int MatrixCalculator::_CalcK(double windSpeed)
     return 0;
 }
 
-int MatrixCalculator::_CalcN(windDir_t windDir)
+int Matrix_Calculator::_CalcN(windDir_t windDir)
 {
     switch (windDir)
     {
@@ -303,7 +303,7 @@ int MatrixCalculator::_CalcN(windDir_t windDir)
     return 0;
 }
 
-void MatrixCalculator::_NormalizeMatrix()
+void Matrix_Calculator::_NormalizeMatrix()
 {
     // нормирование для элементов с k > 0
     for (std::size_t n = 0; n < _matrix.N; n++) {
@@ -371,7 +371,7 @@ void MatrixCalculator::_NormalizeMatrix()
     }
 }
 
-void MatrixCalculator::_CalcWindRose()
+void Matrix_Calculator::_CalcWindRose()
 {
     for (size_t n = 0; n < _matrix.N; n++) {
 
@@ -393,7 +393,7 @@ void MatrixCalculator::_CalcWindRose()
     }
 }
 
-void MatrixCalculator::_CalcWindSpeedRepeatabilityByCompPoint()
+void Matrix_Calculator::_CalcWindSpeedRepeatabilityByCompPoint()
 {
     for (size_t n = 0; n < _matrix.N; n++) {
         for (size_t k = 0; k < _matrix.K; k++) {
@@ -415,7 +415,7 @@ void MatrixCalculator::_CalcWindSpeedRepeatabilityByCompPoint()
     }
 }
 
-void MatrixCalculator::_CalcWindSpeedRepeatability()
+void Matrix_Calculator::_CalcWindSpeedRepeatability()
 {
     for (size_t k = 0; k < _matrix.K; k++) {
         
@@ -430,13 +430,13 @@ void MatrixCalculator::_CalcWindSpeedRepeatability()
     }
 }
 
-void MatrixCalculator::_CalcCalmRepeatability()
+void Matrix_Calculator::_CalcCalmRepeatability()
 {
     _matrix.calmRepCold = _matrix.windSpRepByCPCold[0][0];    
     _matrix.calmRepWarm = _matrix.windSpRepByCPWarm[0][0];
 }
 
-void MatrixCalculator::_CalcSmithParamRepeatability()
+void Matrix_Calculator::_CalcSmithParamRepeatability()
 {
     for (size_t j = 0; j < _matrix.J; j++) {
         
@@ -459,7 +459,7 @@ void MatrixCalculator::_CalcSmithParamRepeatability()
     
 }
 
-void MatrixCalculator::_CalcAverageWindSpeedByCompPoint()
+void Matrix_Calculator::_CalcAverageWindSpeedByCompPoint()
 {
     double avSpeed[_matrix.K] = { 0.5, 1, 2, 3, 4.5, 6.5, 9, 12 };
 
@@ -481,7 +481,7 @@ void MatrixCalculator::_CalcAverageWindSpeedByCompPoint()
     } 
 }
 
-void MatrixCalculator::_CalcAverageWindSpeedBySmithParam()
+void Matrix_Calculator::_CalcAverageWindSpeedBySmithParam()
 {
     for (size_t j = 0; j < _matrix.J; j++) {
         
@@ -501,7 +501,7 @@ void MatrixCalculator::_CalcAverageWindSpeedBySmithParam()
     } 
 }
 
-void MatrixCalculator::_oStreamWindRose(ostream& o)
+void Matrix_Calculator::_oStreamWindRose(ostream& o)
 {
     o << "# повторяемость направлений ветра n −го румба (роза ветров)" << endl
       << "\"Румб, град.\";\"Роза ветров в холодное время года\";\"Роза ветров в теплое время года\"" << endl;
@@ -512,7 +512,7 @@ void MatrixCalculator::_oStreamWindRose(ostream& o)
     }
 }
 
-void MatrixCalculator::_oStreamWindSpeedRepeatability(ostream& o)
+void Matrix_Calculator::_oStreamWindSpeedRepeatability(ostream& o)
 {
     o << "# повторяемость модуля скорости ветра по градации k " << endl
       << "\"Cкорость ветра, м/с\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
@@ -523,15 +523,15 @@ void MatrixCalculator::_oStreamWindSpeedRepeatability(ostream& o)
     }
 }
 
-void MatrixCalculator::_oStreamCalmRepeatability(ostream& o)
+void Matrix_Calculator::_oStreamCalmRepeatability(ostream& o)
 {
     o << "# повторяемость штилей  " << endl
       << "\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl
       << "\"" << _matrix.calmRepCold << "\";\""
-      << "\"" << _matrix.calmRepCold << "\"" << endl; 
+      << "\"" << _matrix.calmRepWarm << "\"" << endl; 
 }
 
-void MatrixCalculator::_oStreamSmithParamRepeatability(ostream& o)
+void Matrix_Calculator::_oStreamSmithParamRepeatability(ostream& o)
 {
     o << "# повторяемость категорий устойчивости " << endl
       << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
@@ -542,7 +542,7 @@ void MatrixCalculator::_oStreamSmithParamRepeatability(ostream& o)
     }
 }
 
-void MatrixCalculator::_oStreamAverageWindSpeedByCompPoint(ostream& o)
+void Matrix_Calculator::_oStreamAverageWindSpeedByCompPoint(ostream& o)
 {
     o << "# приземная средняя скорость ветра n−го румба " << endl
       << "\"Румб, град.\";\"Скорость ветра в холодное время года, м/с\";\"Скорость ветра в теплое время года, м/с\"" << endl;
@@ -553,7 +553,7 @@ void MatrixCalculator::_oStreamAverageWindSpeedByCompPoint(ostream& o)
     }
 }
 
-void MatrixCalculator::_oStreamAverageWindSpeedBySmithParam(ostream& o)
+void Matrix_Calculator::_oStreamAverageWindSpeedBySmithParam(ostream& o)
 {
     o << "# приземная средняя скорость ветра при j−ой категории устойчивости " << endl
       << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "namespace.h"
+#include "my_meteorology.h"
 
-class SmithParamCalculator
+class Smith_Param_Calculator
 {
 
 public:
 
-    SmithParamCalculator(meteorology::observation_t& observation);
+    Smith_Param_Calculator(mm::observation_t& observation);
 
 private:
 
@@ -28,7 +28,7 @@ private:
     void _CorrectionVI();
     void _CorrectionVII();
 
-    meteorology::observation_t& _obs;
+    mm::observation_t& _obs;
 
     double _riseTime; ///< время восхода солнца, ч.
     double _setTime; ///< время захода солнца, ч

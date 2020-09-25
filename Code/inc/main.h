@@ -8,6 +8,6 @@
 #pragma once
 
 #include <iostream>
-#include "namespace.h"
+#include "my_meteorology.h"
 #include "smith_param_calculator.h"
 #include "matrix_calculator.h"

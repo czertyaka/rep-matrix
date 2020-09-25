@@ -7,15 +7,15 @@
 #pragma once
 
 #include <iostream>
-#include "namespace.h"
+#include "my_meteorology.h"
 #include "smith_param_calculator.h"
 
-class MatrixCalculator
+class Matrix_Calculator
 {
 
 public:
 
-    MatrixCalculator(meteorology::matrix_t& matrix, const char* rp5File, double latitude,
+    Matrix_Calculator(mm::matrix_t& matrix, const char* rp5File, double latitude,
                     double longitude);
 
     void DataOStream();
@@ -25,19 +25,19 @@ private:
 
     void _CalcMatrix(const char* rp5File, double latitude, double longitude);
 
-    void _ParseTime(std::string localTime, int& day, meteorology::month_t& month, int& year,
+    void _ParseTime(std::string localTime, int& day, mm::month_t& month, int& year,
                    int& time);
     double _ParseTemper(std::string T);
     double _ParseWindSpeed(std::string Ff);
-    meteorology::windDir_t _ParseWindDir(std::string DD);
+    mm::windDir_t _ParseWindDir(std::string DD);
     int _ParseCloudAmount(std::string N);
     bool _ParseFog(std::string VV);
     bool _ParseSnow(std::string E1, std::string E2);
 
-    void _AddObservation(meteorology::observation_t observation);
-    int _CalcJ(meteorology::smithParam_t smithParam);
+    void _AddObservation(mm::observation_t observation);
+    int _CalcJ(mm::smithParam_t smithParam);
     int _CalcK(double windSpeed);
-    int _CalcN(meteorology::windDir_t windDir_t);
+    int _CalcN(mm::windDir_t windDir_t);
 
     // расчетные методы
     void _NormalizeMatrix();
@@ -57,5 +57,5 @@ private:
     void _oStreamAverageWindSpeedByCompPoint(std::ostream& o);
     void _oStreamAverageWindSpeedBySmithParam(std::ostream& o);
 
-    meteorology::matrix_t& _matrix;
+    mm::matrix_t& _matrix;
 };

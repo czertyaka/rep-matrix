@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-using namespace meteorology;
+using namespace mm;
 
 void oStreamFunc(std::ostream& o)
 {
@@ -16,7 +16,7 @@ void oStreamFunc(std::ostream& o)
 int main()
 {
     matrix_t matrix;
-    MatrixCalculator matrixCalculator(matrix,
+    Matrix_Calculator matrixCalculator(matrix,
                                       "/home/czert/workspace/rep-matrix/RP5-files/big-utf-8.csv",
                                       55.6971868, 60.8041044);
     matrixCalculator.DataOStream();

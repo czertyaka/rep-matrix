@@ -149,21 +149,21 @@ void RP5_CSV_Parser::_ParseCloudAmount()
     else if (_sN == "50%.")                                        { cloudAmount = 5;  }
     else if (_sN == "60%.")                                        { cloudAmount = 6;  }
     else if (_sN == "70 – 80%.")                                   { cloudAmount = 8;  }
-    else if (_sN == "90  или более, но не 100%" || _sN == "100%." || _sN == "100%.") { cloudAmount = 10; }
+    else if (_sN == "90  или более, но не 100%" || _sN == "100%.") { cloudAmount = 10; }
     else
     {
         string msg = "Считана некорректная общая облачность: " + _sN;
         throw msg;
     }
 
-    if      (_sNh == "Облаков нет.")                                { lowerCloudAmount = 0;  }
-    else if (_sNh == "10%  или менее, но не 0")                     { lowerCloudAmount = 1;  }
-    else if (_sNh == "20–30%.")                                     { lowerCloudAmount = 3;  }
-    else if (_sNh == "40%.")                                        { lowerCloudAmount = 4;  }
-    else if (_sNh == "50%.")                                        { lowerCloudAmount = 5;  }
-    else if (_sNh == "60%.")                                        { lowerCloudAmount = 6;  }
-    else if (_sNh == "70 – 80%.")                                   { lowerCloudAmount = 8;  }
-    else if (_sNh == "90  или более, но не 100%" || _sN == "100%.") { lowerCloudAmount = 10; }
+    if      (_sNh == "Облаков нет.")                                 { lowerCloudAmount = 0;  }
+    else if (_sNh == "10%  или менее, но не 0")                      { lowerCloudAmount = 1;  }
+    else if (_sNh == "20–30%.")                                      { lowerCloudAmount = 3;  }
+    else if (_sNh == "40%.")                                         { lowerCloudAmount = 4;  }
+    else if (_sNh == "50%.")                                         { lowerCloudAmount = 5;  }
+    else if (_sNh == "60%.")                                         { lowerCloudAmount = 6;  }
+    else if (_sNh == "70 – 80%.")                                    { lowerCloudAmount = 8;  }
+    else if (_sNh == "90  или более, но не 100%" || _sNh == "100%.") { lowerCloudAmount = 10; }
     else
     {
         string msg = "Считана некорректная нижняя облачность: " + _sNh;

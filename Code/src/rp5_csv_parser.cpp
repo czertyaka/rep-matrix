@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <fstream>
 #include "rp5_csv_parser.h"
 #include "csv.h"
 
@@ -26,15 +27,45 @@ RP5_CSV_Parser::RP5_CSV_Parser(const char* file, vector<observation_t>& vObs) :
 
 void RP5_CSV_Parser::_PreParseTasks()
 {
+    // open everything
+    string s;
+    ifstream origFile(_rp5File);
+    ofstream tmpFile("tmp.csv");
+    string newHeader  = "Time";
 
+    while (getline(origFile, s))
+    {
+        // skip comments
+        if (s.at(0) == '#') { continue; }
+
+        // fix location name in time column header
+        size_t posFirst = s.find("М");
+        if (posFirst == 1)
+        {
+            size_t posLast = s.find(";");
+            s.erase(posFirst, posLast - posFirst - 1);
+            s.insert(posFirst, newHeader);
+        }
+
+        // fix excess ";"
+        if (s.at(s.length() - 2) == ';')
+        {
+            s.erase(s.length() - 2, 1);
+        }
+
+        tmpFile << s << endl;
+    }
+    
+    origFile.close();
+    tmpFile.close();
 }
 
 void RP5_CSV_Parser::_Parse()
 {
     CSVReader<9, trim_chars<' ', '\t'>, double_quote_escape<';', '"'>, throw_on_overflow,
-              single_and_empty_line_comment<'#'> > in(_rp5File);
+              single_and_empty_line_comment<'#'> > in("tmp.csv");
 
-    in.read_header(ignore_extra_column, "Местное время в Аргаяше", "T", "DD", "Ff", "N", "Nh", "VV",
+    in.read_header(ignore_extra_column, "Time", "T", "DD", "Ff", "N", "Nh", "VV",
                    "E", "E'");
 
     // loop reading .csv
@@ -83,6 +114,8 @@ void RP5_CSV_Parser::_Parse()
         // add
         _vObs.push_back(_obs);
     }
+
+    remove("tmp.csv");
 }
 
 void RP5_CSV_Parser::_ParseTime()

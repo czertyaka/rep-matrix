@@ -1,3 +1,10 @@
+/**
+ * @file my_meteorology.h
+ * @author czertyaka
+ * @brief 
+ * @date 2020-09-25
+ */
+
 #pragma once
 
 #include <cstddef>

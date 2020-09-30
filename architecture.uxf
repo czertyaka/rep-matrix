@@ -1,26 +1,34 @@
 <diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><help_text>Space for diagram notes
 --
-+Smith_Param_CalculatorSmith_Param_Calculator</help_text><element><id>UMLClass</id><coordinates><x>310</x><y>250</y><w>380</w><h>150</h></coordinates><panel_attributes>/MM_CSV_Parser/
++Smith_Param_CalculatorSmith_Param_Calculator</help_text><element><id>UMLClass</id><coordinates><x>150</x><y>280</y><w>280</w><h>100</h></coordinates><panel_attributes>/MM_CSV_Parser/
 --
-+MM_CSV_Reader(file: const char*, vObs: vector&lt;observation_t&gt;)
---
+#MM_CSV_Reader(vObs: vector&lt;observation_t&gt;)
 #_vObs:  vector&lt;observation_t&gt;
-#_rdr: io::CSVReader
-#_sTime: string
-#_sTemp: string
+--
+/-_Parse(): virtual void/
+/-_PreParseTasks(): virtual void/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>150</x><y>410</y><w>360</w><h>130</h></coordinates><panel_attributes>RP5_CSV_Parser
+--
++RP5_CSV_Parser(file: const char*, vObs: vector&lt;observation_t&gt;)
+--
+-_sTime: string
+-_sDD: string
 ...
---
-/-_ParseString(): virtual void/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>310</x><y>440</y><w>140</w><h>50</h></coordinates><panel_attributes>RP5_CSV_Parser
---
--_ParseString(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>370</x><y>390</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLClass</id><coordinates><x>310</x><y>530</y><w>270</w><h>70</h></coordinates><panel_attributes>Smith_Param_Calculator
+-_Parse(): void
+-_PreParseTasks(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>210</x><y>370</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLClass</id><coordinates><x>150</x><y>600</y><w>270</w><h>70</h></coordinates><panel_attributes>Smith_Param_Calculator
 --
 +Smith_Param_Calculator(obs: observation_t&amp;)
 --
--_obs: observation_t&amp;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>630</x><y>530</y><w>360</w><h>80</h></coordinates><panel_attributes>Matrix_Calculator
+-_obs: observation_t&amp;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>470</x><y>600</y><w>360</w><h>80</h></coordinates><panel_attributes>Matrix_Calculator
 --
 +Matrix_Calculator(m: matrix_t&amp;, vObs: vector&lt;observation_t&gt;)
 --
 -_m: matrix_t&amp;
--_vObs: vector&lt;observation_t&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>570</x><y>560</y><w>80</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>490</x><y>440</y><w>200</w><h>50</h></coordinates><panel_attributes>Another_Format_CSV_Parser
+-_vObs: vector&lt;observation_t&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>410</x><y>630</y><w>80</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;60;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>520</x><y>410</y><w>430</w><h>130</h></coordinates><panel_attributes>Another_Format_CSV_Parser
 --
--_ParseString(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>580</x><y>390</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element></diagram>
++Another_Format_CSV_Parser(file: const char*, vObs: vector&lt;observation_t&gt;)
+--
+-_sParam1: string
+-_sParam2: string
+...
+-_Parse(): void
+-_PreParseTasks(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>420</x><y>350</y><w>220</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;200;10;200;60</additional_attributes></element><element><id>UMLClass</id><coordinates><x>850</x><y>290</y><w>100</w><h>30</h></coordinates><panel_attributes>io::CSVReader</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>890</x><y>310</y><w>30</w><h>120</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>460</x><y>290</y><w>410</w><h>140</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>390;10;10;10;10;120</additional_attributes></element></diagram>

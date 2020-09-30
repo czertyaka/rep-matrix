@@ -1,6 +1,6 @@
 .DEFAULT := all
 
-OBJ := main.o matrix_calculator.o smith_param_calculator.o
+OBJ := main.o mm_csv_parser.o rp5_csv_parser.o
 LIB := -lpthread
 INC_PATH := ../Code/inc
 PARSER_INC_PATH := ../Code/fast-cpp-csv-parser

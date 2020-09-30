@@ -1,5 +1,5 @@
 /**
- * @file matrix.h
+ * @file smith_param_calculator.h
  * @author czertyaka
  * @date 2020-08-10
  * @brief Файл с классои Matrix - основным классом расчетного модуля матрицы повторяемости

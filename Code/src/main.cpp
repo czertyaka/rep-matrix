@@ -6,20 +6,14 @@
  */
 
 #include "main.h"
-using namespace mm;
 
-void oStreamFunc(std::ostream& o)
-{
-    o << "hey!" << std::endl;
-}
+using namespace mm;
+using namespace std;
 
 int main()
 {
-    matrix_t matrix;
-    Matrix_Calculator matrixCalculator(matrix,
-                                      "/home/czert/workspace/rep-matrix/RP5-files/big-utf-8.csv",
-                                      55.6971868, 60.8041044);
-    matrixCalculator.DataOStream();
+    vector<observation_t> vObs;
+    RP5_CSV_Parser parser("/home/czert/workspace/rep-matrix/RP5-files/big-utf-8.csv", vObs);
 
     return 0;
 }

@@ -1,5 +1,5 @@
 /**
- * @file stability_cathegory.cpp
+ * @file smith_param_calculator.cpp
  * @author your name (you@domain.com)
  * @date 2020-08-16
  * @brief 

@@ -1,5 +1,5 @@
 /**
- * @file Matrix_Calculator.cpp
+ * @file matrix_calculator.cpp
  * @author czertyaka
  * @date 2020-08-10
  * @brief Реализация методов Matrix_Calculator

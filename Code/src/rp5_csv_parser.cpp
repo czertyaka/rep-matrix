@@ -7,16 +7,20 @@
 
 #include <string>
 #include <fstream>
-#include "rp5_csv_parser.h"
 #include "csv.h"
+#include "smith_param_calculator.h"
+#include "rp5_csv_parser.h"
 
 using namespace io;
 using namespace std;
 using namespace mm;
 
-RP5_CSV_Parser::RP5_CSV_Parser(const char* file, vector<observation_t>& vObs) :
+RP5_CSV_Parser::RP5_CSV_Parser(const char* file, vector<observation_t>& vObs,
+                               double latitude, double longitude) :
                                MM_CSV_Parser(vObs),
                                _rp5File(file),
+                               _latitude(latitude),
+                               _longitude(longitude),
                                _obs({0}),
                                _sPrevE1(""),
                                _sPrevE2("")
@@ -32,6 +36,8 @@ void RP5_CSV_Parser::_PreParseTasks()
     ifstream origFile(_rp5File);
     ofstream tmpFile("tmp.csv");
     string newHeader  = "Time";
+
+    if(!origFile.is_open()) throw "Файл с данными не открыт.";
 
     while (getline(origFile, s))
     {
@@ -110,6 +116,10 @@ void RP5_CSV_Parser::_Parse()
             cerr << "Измерение от " << _sTime << " не будет включено в расчет в связи с некорректными значениями в файле данных." << endl;
             continue;
         }
+
+        _obs.latitude = _latitude;
+        _obs.longitude = _longitude;
+        Smith_Param_Calculator sPCalc(_obs);
 
         // add
         _vObs.push_back(_obs);

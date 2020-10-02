@@ -7,6 +7,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include "my_meteorology.h"
 #include "smith_param_calculator.h"
 
@@ -15,24 +16,16 @@ class Matrix_Calculator
 
 public:
 
-    Matrix_Calculator(mm::matrix_t& matrix, const char* rp5File, double latitude,
-                    double longitude);
+    Matrix_Calculator();
+    Matrix_Calculator(std::vector<mm::observation_t>& vObs);
 
+    mm::matrix_t GetMatrix();
     void DataOStream();
     void DataOStream(std::ostream& o);
 
 private:
 
-    void _CalcMatrix(const char* rp5File, double latitude, double longitude);
-
-    void _ParseTime(std::string localTime, int& day, mm::month_t& month, int& year,
-                   int& time);
-    double _ParseTemper(std::string T);
-    double _ParseWindSpeed(std::string Ff);
-    mm::windDir_t _ParseWindDir(std::string DD);
-    int _ParseCloudAmount(std::string N);
-    bool _ParseFog(std::string VV);
-    bool _ParseSnow(std::string E1, std::string E2);
+    void _CalcMatrix();
 
     void _AddObservation(mm::observation_t observation);
     int _CalcJ(mm::smithParam_t smithParam);
@@ -57,5 +50,6 @@ private:
     void _oStreamAverageWindSpeedByCompPoint(std::ostream& o);
     void _oStreamAverageWindSpeedBySmithParam(std::ostream& o);
 
-    mm::matrix_t& _matrix;
+    mm::matrix_t _m;
+    std::vector<mm::observation_t>& _vObs;
 };

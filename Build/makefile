@@ -1,6 +1,12 @@
 .DEFAULT := all
 
-OBJ := main.o mm_csv_parser.o rp5_csv_parser.o
+OBJ := \
+main.o \
+mm_csv_parser.o \
+rp5_csv_parser.o \
+matrix_calculator.o \
+smith_param_calculator.o
+
 LIB := -lpthread
 INC_PATH := ../Code/inc
 PARSER_INC_PATH := ../Code/fast-cpp-csv-parser
@@ -20,5 +26,5 @@ all: $(OBJ)
 
 clean:
 	@echo "..."
-	@rm -rf *.o main
+	@rm -rf *.o main ../Output/*
 	@echo "Done cleaning."

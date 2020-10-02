@@ -12,8 +12,8 @@ using namespace mm;
 
 double DegToRad(double degree) { return degree / 180 *M_PI; }
 
-Smith_Param_Calculator::Smith_Param_Calculator(observation_t& observation):
-    _obs(observation)
+Smith_Param_Calculator::Smith_Param_Calculator(observation_t& obs):
+    _obs(obs)
 {
     _CalcSmithParam();
 }

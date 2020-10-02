@@ -14,7 +14,8 @@
 class RP5_CSV_Parser : public MM_CSV_Parser
 {
 public:
-    RP5_CSV_Parser(const char* file, std::vector<mm::observation_t>& vObs);
+    RP5_CSV_Parser(const char* file, std::vector<mm::observation_t>& vObs,
+                   double latitude, double longitude);
     ~RP5_CSV_Parser() = default;
 private:
     void _Parse();
@@ -39,4 +40,6 @@ private:
     std::string _sPrevE1;
     std::string _sPrevE2;
     std::string _sT; // температура воздуха (град. Цельсия)
+    double _latitude;
+    double _longitude;
 };

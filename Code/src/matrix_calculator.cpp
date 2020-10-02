@@ -13,11 +13,9 @@ using namespace std;
 using namespace io;
 using namespace mm;
 
-Matrix_Calculator::Matrix_Calculator(matrix_t& matrix, const char* rp5File,
-                                   double latitude, double longitude) :
-                                   _matrix(matrix)
+Matrix_Calculator::Matrix_Calculator(vector<observation_t>& vObs) : _vObs(vObs)
 {
-    _CalcMatrix(rp5File, latitude, longitude);
+    _CalcMatrix();
 }
 
 void Matrix_Calculator::DataOStream()
@@ -58,67 +56,12 @@ void Matrix_Calculator::DataOStream(ostream& o)
     _oStreamAverageWindSpeedBySmithParam(o);
 }
 
-void Matrix_Calculator::_CalcMatrix(const char* rp5File, double latitude, double longitude)
+void Matrix_Calculator::_CalcMatrix()
 {
-    string localTime;   // местное время
-    string DD;          // направление ветра высоте 10-12 м уср. за 10 мин до наблюдения (румбы)
-    string Ff;          // скорость ветра на высоте 10-12 м уср. за 10 мин до наблюдения (м/с)
-    string N;           // общая облачность (%)
-    string Nh;          // кол-во всех наблюдавшихся Cl (если их нет, кол-во Cm)
-    string VV;          // горизонатльная дальность видимости (км)
-    string E1;          // состояние поверхности почвы без снега или измеримого ледяного покрова
-    string E2;          // состояние поверхности почвы со снегом или измеримым ледяным покровом
-    string prevE1 = ""; 
-    string prevE2 = ""; 
-    string T;           // температура воздуха (град. Цельсия)
-
-    CSVReader<9, trim_chars<' ', '\t'>, double_quote_escape<';', '"'>, throw_on_overflow,
-              single_and_empty_line_comment<'#'> > in(rp5File);
-
-    in.read_header(ignore_extra_column, "Местное время в Аргаяше", "T", "DD", "Ff", "N", "Nh", "VV",
-                   "E", "E'");
-
-    // loop reading .csv
-    while(in.read_row(localTime, T, DD, Ff, N, Nh, VV, E1, E2))
+    for (vector<observation_t>::iterator iter = _vObs.begin(); iter != _vObs.end(); iter++)
     {
-        // restore ground surface!
-        E1 = E1.empty() ? prevE1 : E1;
-        E2 = E2.empty() ? prevE2 : E2;
-        prevE1 = E1;
-        prevE2 = E2;
-
-        // check if we need to skip this observation
-        if (
-            localTime.empty() || DD.empty() || Ff.empty() || N.empty() || Nh.empty() ||
-            VV.empty() || T.empty() ||
-            N == "Небо не видно из-за тумана и/или других метеорологических явлений." ||
-            Nh == "Небо не видно из-за тумана и/или других метеорологических явлений." ||
-            (E1.empty() && E2.empty())
-        )
-        {
-            continue;
-        }
-
-        // parse
-        observation_t observation;
-        _ParseTime(localTime, observation.day, observation.month,
-                   observation.year, observation.time);
-        observation.latitude = latitude;
-        observation.longitude = longitude;
-        observation.temper = _ParseTemper(T);
-        observation.windDir = _ParseWindDir(DD);
-        observation.windSpeed = _ParseWindSpeed(Ff);
-        observation.cloudAmount = _ParseCloudAmount(N);
-        observation.lowerCloudAmount = _ParseCloudAmount(Nh);
-        observation.fog = _ParseFog(VV);
-        observation.snow = _ParseSnow(E1, E2);
-
-        // calculate smith parameter
-        Smith_Param_Calculator smithParamCalculator(observation);
-
-        // and finally...
-        _AddObservation(observation);
-    }
+        _AddObservation(*iter);
+    }    
 
     _NormalizeMatrix();
     _CalcWindRose();
@@ -130,110 +73,21 @@ void Matrix_Calculator::_CalcMatrix(const char* rp5File, double latitude, double
     _CalcAverageWindSpeedBySmithParam();
 }
 
-void Matrix_Calculator::_ParseTime(string localTime, int& day, month_t& month, int& year, int& time)
-{
-    const char* cLocalTime = localTime.c_str();
-    const char* format;
-    if      (cLocalTime[3] == '0' && cLocalTime[11] == '0') { format = "%2i.0%i.%4i 0%i:00"; }
-    else if (cLocalTime[3] == '0' && cLocalTime[11] != '0') { format = "%2i.0%i.%4i %2i:00"; }
-    else if (cLocalTime[3] != '0' && cLocalTime[11] == '0') { format = "%2i.%2i.%4i 0%i:00"; }
-    else if (cLocalTime[3] != '0' && cLocalTime[11] != '0') { format = "%2i.%2i.%4i %2i:00"; }
-    sscanf(cLocalTime, format, &day, reinterpret_cast<int*>(&month), &year, &time);
-}
-
-double Matrix_Calculator::_ParseTemper(string T)
-{
-    return stod(T);
-}
-
-double Matrix_Calculator::_ParseWindSpeed(std::string Ff)
-{
-    return stod(Ff);
-}
-
-windDir_t Matrix_Calculator::_ParseWindDir(string DD)
-{
-    windDir_t windDir;
-
-    if      (DD == "Штиль, безветрие")                          { windDir = calm; }
-    else if (DD == "Ветер, дующий с севера")                    { windDir = N;    }
-    else if (DD == "Ветер, дующий с северо-северо-востока")     { windDir = NNE;  }
-    else if (DD == "Ветер, дующий с северо-востока")            { windDir = NE;   }
-    else if (DD == "Ветер, дующий с востоко-северо-востока")    { windDir = ENE;  }
-    else if (DD == "Ветер, дующий с востока")                   { windDir = E;    }
-    else if (DD == "Ветер, дующий с востоко-юго-востока")       { windDir = ESE;  }
-    else if (DD == "Ветер, дующий с юго-востока")               { windDir = SE;   }
-    else if (DD == "Ветер, дующий с юго-юго-востока")           { windDir = SSE;  }
-    else if (DD == "Ветер, дующий с юга")                       { windDir = S;    }
-    else if (DD == "Ветер, дующий с юго-юго-запада")            { windDir = SSW;  }
-    else if (DD == "Ветер, дующий с юго-запада")                { windDir = SW;   }
-    else if (DD == "Ветер, дующий с западо-юго-запада")         { windDir = WSW;  }
-    else if (DD == "Ветер, дующий с запада")                    { windDir = W;    }
-    else if (DD == "Ветер, дующий с западо-северо-запада")      { windDir = WNW;  }
-    else if (DD == "Ветер, дующий с северо-запада")             { windDir = NW;   }
-    else if (DD == "Ветер, дующий с северо-северо-запада")      { windDir = NNW;  }
-    else
-    {
-        std::cerr << "Считано некорректное направление ветра: " << DD << std::endl;
-        std::exit(-1);
-    }
-
-    return windDir;
-}
-
-int Matrix_Calculator::_ParseCloudAmount(string N)
-{
-    int cloudAmount;
-    
-    if      (N == "Облаков нет.")                               { cloudAmount = 0;  }
-    else if (N == "10%  или менее, но не 0")                    { cloudAmount = 1;  }
-    else if (N == "20–30%.")                                    { cloudAmount = 3;  }
-    else if (N == "40%.")                                       { cloudAmount = 4;  }
-    else if (N == "50%.")                                       { cloudAmount = 5;  }
-    else if (N == "60%.")                                       { cloudAmount = 6;  }
-    else if (N == "70 – 80%.")                                  { cloudAmount = 8;  }
-    else if (N == "90  или более, но не 100%" || N == "100%.")  { cloudAmount = 10; }
-    else
-    {
-        std::cerr << "Считана некорректная облачность: " << N << std::endl;
-        std::exit(-1);
-    }
-
-    return cloudAmount;
-}
-
-bool Matrix_Calculator::_ParseFog(std::string VV)
-{
-    if (VV == "менее 0.05") { return true; }
-    return stod(VV) < 1 ? true : false;
-}
-
-bool Matrix_Calculator::_ParseSnow(string E1, string E2)
-{
-    return (
-        E2 != "Неровный слой слежавшегося или мокрого снега покрывает почву полностью." &&
-        E2 != "Неровный слой сухого рассыпчатого снега покрывает поверхность почвы полностью." &&
-        E2 != "Ровный слой слежавшегося или мокрого снега покрывает поверхность почвы полностью." &&
-        E2 != "Ровный слой сухого рассыпчатого снега покрывает поверхность почвы полностью." &&
-        E2 != "Снег покрывает поверхность почвы полностью; глубокие сугробы."
-        ) ? false : true;
-}
-
 void Matrix_Calculator::_AddObservation(observation_t observation)
 {
     int j = _CalcJ(observation.smithParam);
     int k = _CalcK(observation.windSpeed);
     int n = _CalcN(observation.windDir);
 
-    if (observation.temper > 0) {
-        _matrix.mCold[n][j][k]++;
-        _matrix.MCold++;
-        if (k != 0) { _matrix.MColdNoCalm++; }
+    if (observation.temper < 0) {
+        _m.mCold[n][j][k]++;
+        _m.MCold++;
+        if (k != 0) { _m.MColdNoCalm++; }
     }
     else {
-        _matrix.mWarm[n][j][k]++;
-        _matrix.MWarm++;
-        if (k != 0) { _matrix.MWarmNoCalm++; }
+        _m.mWarm[n][j][k]++;
+        _m.MWarm++;
+        if (k != 0) { _m.MWarmNoCalm++; }
     }
 }
 
@@ -306,13 +160,15 @@ int Matrix_Calculator::_CalcN(windDir_t windDir)
 void Matrix_Calculator::_NormalizeMatrix()
 {
     // нормирование для элементов с k > 0
-    for (std::size_t n = 0; n < _matrix.N; n++) {
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            for (std::size_t k = 1; k < _matrix.K; k++) {
-                _matrix.wCold[n][j][k] = static_cast<double>(_matrix.mCold[n][j][k]) /
-                                         static_cast<double>(_matrix.MCold);
-                _matrix.wWarm[n][j][k] = static_cast<double>(_matrix.mWarm[n][j][k]) /
-                                         static_cast<double>(_matrix.MWarm);
+    for (std::size_t n = 0; n < _m.N; n++) {
+        for (std::size_t j = 0; j < _m.J; j++) {
+            for (std::size_t k = 1; k < _m.K; k++) {
+                _m.wCold[n][j][k] = _m.MCold != 0 ?
+                                    static_cast<double>(_m.mCold[n][j][k]) /
+                                    static_cast<double>(_m.MCold) : 0;
+                _m.wWarm[n][j][k] = _m.MWarm != 0 ?
+                                    static_cast<double>(_m.mWarm[n][j][k]) /
+                                    static_cast<double>(_m.MWarm) : 0;
             }
         }
     }
@@ -320,52 +176,56 @@ void Matrix_Calculator::_NormalizeMatrix()
     // нормирование для элементов с k = 0
     int sum2Cold = 0;
     int sum2Warm = 0;
-    for (std::size_t n = 0; n < _matrix.N; n++) {
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            sum2Cold += _matrix.mCold[n][j][1];
-            sum2Warm += _matrix.mWarm[n][j][1];
+    for (std::size_t n = 0; n < _m.N; n++) {
+        for (std::size_t j = 0; j < _m.J; j++) {
+            sum2Cold += _m.mCold[n][j][1];
+            sum2Warm += _m.mWarm[n][j][1];
         }
     }
     
-    for (std::size_t n = 0; n < _matrix.N; n++) {
+    for (std::size_t n = 0; n < _m.N; n++) {
 
         int sum1Cold = 0;
         int sum1Warm = 0;
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            sum1Cold += _matrix.mCold[n][j][1];
-            sum1Warm += _matrix.mWarm[n][j][1];
+        for (std::size_t j = 0; j < _m.J; j++) {
+            sum1Cold += _m.mCold[n][j][1];
+            sum1Warm += _m.mWarm[n][j][1];
         }
 
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            _matrix.wCold[n][j][0] = static_cast<double>(_matrix.mCold[0][j][0]) /
-                                     static_cast<double>(_matrix.MCold) *
-                                     static_cast<double>(sum1Cold) /
-                                     static_cast<double>(sum2Cold);
-            _matrix.wWarm[n][j][0] = static_cast<double>(_matrix.mWarm[0][j][0]) /
-                                     static_cast<double>(_matrix.MWarm) *
-                                     static_cast<double>(sum1Warm) /
-                                     static_cast<double>(sum2Warm);
+        for (std::size_t j = 0; j < _m.J; j++) {
+            _m.wCold[n][j][0] = _m.MCold != 0 ?
+                                static_cast<double>(_m.mCold[0][j][0]) /
+                                static_cast<double>(_m.MCold) *
+                                static_cast<double>(sum1Cold) /
+                                static_cast<double>(sum2Cold) :
+                                0;
+            _m.wWarm[n][j][0] = _m.MWarm != 0 ?
+                                static_cast<double>(_m.mWarm[0][j][0]) /
+                                static_cast<double>(_m.MWarm) *
+                                static_cast<double>(sum1Warm) /
+                                static_cast<double>(sum2Warm) :
+                                0;
         }
     }
 
     // проверка нормированности
     double wColdSum = 0;
     double wWarmSum = 0;
-    for (std::size_t n = 0; n < _matrix.N; n++) {
-        for (std::size_t j = 0; j < _matrix.J; j++) {
-            for (std::size_t k = 0; k < _matrix.K; k++) {
-                wColdSum += _matrix.wCold[n][j][k];
-                wWarmSum += _matrix.wWarm[n][j][k];
+    for (std::size_t n = 0; n < _m.N; n++) {
+        for (std::size_t j = 0; j < _m.J; j++) {
+            for (std::size_t k = 0; k < _m.K; k++) {
+                wColdSum += _m.wCold[n][j][k];
+                wWarmSum += _m.wWarm[n][j][k];
             }
         }
     }
 
-    if (abs(wColdSum - 1) > 0.0001) {
+    if (abs(wColdSum - 1) > 0.0001 && _m.MCold != 0) {
         cerr << "Проверка нормированности холодной матрицы не сходится. Сумма элементов: "
              << wColdSum << endl;
     }
     
-    if (abs(wWarmSum - 1) > 0.0001) {
+    if (abs(wWarmSum - 1) > 0.0001 && _m.MWarm != 0) {
         cerr << "Проверка нормированности теплой матрицы не сходится. Сумма элементов: "
              << wWarmSum << endl;
     }
@@ -373,131 +233,145 @@ void Matrix_Calculator::_NormalizeMatrix()
 
 void Matrix_Calculator::_CalcWindRose()
 {
-    for (size_t n = 0; n < _matrix.N; n++) {
+    for (size_t n = 0; n < _m.N; n++) {
 
         // calc sums
         int sumCold = 0;
         int sumWarm = 0;
-        for (size_t j = 0; j < _matrix.J; j++) {
-            for (size_t k = 1; k < _matrix.K; k++) {
-                sumCold += _matrix.mCold[n][j][k];
-                sumWarm += _matrix.mWarm[n][j][k];
+        for (size_t j = 0; j < _m.J; j++) {
+            for (size_t k = 1; k < _m.K; k++) {
+                sumCold += _m.mCold[n][j][k];
+                sumWarm += _m.mWarm[n][j][k];
             }  
         }
 
         // calc rose
-        _matrix.windRoseCold[n] = static_cast<double>(sumCold) /
-                                  static_cast<double>(_matrix.MColdNoCalm);
-        _matrix.windRoseWarm[n] = static_cast<double>(sumWarm) /
-                                  static_cast<double>(_matrix.MWarmNoCalm);
+        _m.windRoseCold[n] = _m.MColdNoCalm != 0 ?
+                             static_cast<double>(sumCold) /
+                             static_cast<double>(_m.MColdNoCalm) : 0;
+        _m.windRoseWarm[n] = _m.MWarmNoCalm != 0 ?
+                             static_cast<double>(sumWarm) /
+                             static_cast<double>(_m.MWarmNoCalm) : 0;
     }
 }
 
 void Matrix_Calculator::_CalcWindSpeedRepeatabilityByCompPoint()
 {
-    for (size_t n = 0; n < _matrix.N; n++) {
-        for (size_t k = 0; k < _matrix.K; k++) {
+    for (size_t n = 0; n < _m.N; n++) {
+        for (size_t k = 0; k < _m.K; k++) {
             
             // calc sums
             int sumCold = 0;
             int sumWarm = 0;
-            for (size_t j = 0; j < _matrix.J; j++) {
-                sumCold += _matrix.mCold[n][j][k];
-                sumWarm += _matrix.mWarm[n][j][k];
+            for (size_t j = 0; j < _m.J; j++) {
+                sumCold += _m.mCold[n][j][k];
+                sumWarm += _m.mWarm[n][j][k];
             }
 
             // calc reps
-            _matrix.windSpRepByCPCold[n][k] = static_cast<double>(sumCold) /
-                                              static_cast<double>(_matrix.MCold);
-            _matrix.windSpRepByCPWarm[n][k] = static_cast<double>(sumWarm) /
-                                              static_cast<double>(_matrix.MWarm);
+            _m.windSpRepByCPCold[n][k] = _m.MCold != 0 ?
+                                         static_cast<double>(sumCold) /
+                                         static_cast<double>(_m.MCold) : 0;
+            _m.windSpRepByCPWarm[n][k] = _m.MWarm != 0 ? 
+                                         static_cast<double>(sumWarm) /
+                                         static_cast<double>(_m.MWarm) : 0;
         }
     }
 }
 
 void Matrix_Calculator::_CalcWindSpeedRepeatability()
 {
-    for (size_t k = 0; k < _matrix.K; k++) {
+    for (size_t k = 0; k < _m.K; k++) {
         
-        _matrix.windSpRepCold[k] = 0;
-        _matrix.windSpRepWarm[k] = 0;
+        _m.windSpRepCold[k] = 0;
+        _m.windSpRepWarm[k] = 0;
 
-        for (size_t n = 0; n < _matrix.N; n++) {
+        for (size_t n = 0; n < _m.N; n++) {
             
-            _matrix.windSpRepCold[k] += _matrix.windSpRepByCPCold[n][k];
-            _matrix.windSpRepWarm[k] += _matrix.windSpRepByCPWarm[n][k];
+            _m.windSpRepCold[k] += _m.windSpRepByCPCold[n][k];
+            _m.windSpRepWarm[k] += _m.windSpRepByCPWarm[n][k];
         }
     }
 }
 
 void Matrix_Calculator::_CalcCalmRepeatability()
 {
-    _matrix.calmRepCold = _matrix.windSpRepByCPCold[0][0];    
-    _matrix.calmRepWarm = _matrix.windSpRepByCPWarm[0][0];
+    _m.calmRepCold = _m.windSpRepByCPCold[0][0];    
+    _m.calmRepWarm = _m.windSpRepByCPWarm[0][0];
 }
 
 void Matrix_Calculator::_CalcSmithParamRepeatability()
 {
-    for (size_t j = 0; j < _matrix.J; j++) {
+    for (size_t j = 0; j < _m.J; j++) {
         
         // cals sums
         int sumCold = 0;
         int sumWarm = 0;
-        for (size_t n = 0; n < _matrix.N; n++) {
-            for (size_t k = 0; k < _matrix.K; k++) {
-                sumCold += _matrix.mCold[n][j][k];
-                sumWarm += _matrix.mWarm[n][j][k];
+        for (size_t n = 0; n < _m.N; n++) {
+            for (size_t k = 0; k < _m.K; k++) {
+                sumCold += _m.mCold[n][j][k];
+                sumWarm += _m.mWarm[n][j][k];
             }
         }
 
         // calc reps
-        _matrix.smithParamRepCold[j] = static_cast<double>(sumCold) /
-                                       static_cast<double>(_matrix.MCold);
-        _matrix.smithParamRepWarm[j] = static_cast<double>(sumWarm) /
-                                       static_cast<double>(_matrix.MWarm);
+        _m.smithParamRepCold[j] = _m.MCold != 0 ?
+                                  static_cast<double>(sumCold) /
+                                  static_cast<double>(_m.MCold) : 0;
+        _m.smithParamRepWarm[j] = _m.MWarm != 0 ?
+                                  static_cast<double>(sumWarm) /
+                                  static_cast<double>(_m.MWarm) : 0;
     }
     
 }
 
 void Matrix_Calculator::_CalcAverageWindSpeedByCompPoint()
 {
-    double avSpeed[_matrix.K] = { 0.5, 1, 2, 3, 4.5, 6.5, 9, 12 };
+    double avSpeed[_m.K] = { 0.5, 1, 2, 3, 4.5, 6.5, 9, 12 };
 
-    for (size_t n = 0; n < _matrix.N; n++) {
+    for (size_t n = 0; n < _m.N; n++) {
         
         // calc sums
         int sumCold = 0;
         int sumWarm = 0;
-        for (size_t k = 0; k < _matrix.K; k++) {
-            for (size_t j = 0; j < _matrix.J; j++) {
-                sumCold += _matrix.mCold[n][j][k] * _matrix.windSpeedVals[k];
-                sumWarm += _matrix.mWarm[n][j][k] * _matrix.windSpeedVals[k];
+        for (size_t k = 0; k < _m.K; k++) {
+            for (size_t j = 0; j < _m.J; j++) {
+                sumCold += _m.mCold[n][j][k] * _m.windSpeedVals[k];
+                sumWarm += _m.mWarm[n][j][k] * _m.windSpeedVals[k];
             }
         }
 
         // calc speeds
-        _matrix.avWindSpByCPCold[n] = static_cast<double>(sumCold) / static_cast<double>(_matrix.MCold) ;
-        _matrix.avWindSpByCPWarm[n] = static_cast<double>(sumWarm) / static_cast<double>(_matrix.MWarm) ;
+        _m.avWindSpByCPCold[n] = _m.MCold != 0 ?
+                                 static_cast<double>(sumCold) / static_cast<double>(_m.MCold) :
+                                 0;
+        _m.avWindSpByCPWarm[n] = _m.MCold != 0 ?
+                                 static_cast<double>(sumWarm) / static_cast<double>(_m.MWarm) :
+                                 0;
     } 
 }
 
 void Matrix_Calculator::_CalcAverageWindSpeedBySmithParam()
 {
-    for (size_t j = 0; j < _matrix.J; j++) {
+    for (size_t j = 0; j < _m.J; j++) {
         
         // calc sums
         int sumCold = 0;
         int sumWarm = 0;
-        for (size_t k = 0; k < _matrix.K; k++) {
-            for (size_t n = 0; n < _matrix.N; n++) {
-                sumCold += _matrix.mCold[n][j][k] * _matrix.windSpeedVals[k];
-                sumWarm += _matrix.mWarm[n][j][k] * _matrix.windSpeedVals[k];
+        for (size_t k = 0; k < _m.K; k++) {
+            for (size_t n = 0; n < _m.N; n++) {
+                sumCold += _m.mCold[n][j][k] * _m.windSpeedVals[k];
+                sumWarm += _m.mWarm[n][j][k] * _m.windSpeedVals[k];
             }
         }
 
         // calc speeds
-        _matrix.avWindSpBySPCold[j] = static_cast<double>(sumCold) / static_cast<double>(_matrix.MCold) ;
-        _matrix.avWindSpBySPWarm[j] = static_cast<double>(sumWarm) / static_cast<double>(_matrix.MWarm) ;
+        _m.avWindSpBySPCold[j] = _m.MCold != 0 ?
+                                 static_cast<double>(sumCold) / static_cast<double>(_m.MCold) :
+                                 0;
+        _m.avWindSpBySPWarm[j] = _m.MWarm != 0 ?
+                                 static_cast<double>(sumWarm) / static_cast<double>(_m.MWarm) :
+                                 0;
     } 
 }
 
@@ -505,10 +379,10 @@ void Matrix_Calculator::_oStreamWindRose(ostream& o)
 {
     o << "# повторяемость направлений ветра n −го румба (роза ветров)" << endl
       << "\"Румб, град.\";\"Роза ветров в холодное время года\";\"Роза ветров в теплое время года\"" << endl;
-    for (size_t n = 0; n < _matrix.N; n++) {
-        o << "\"" << _matrix.windDirVals[n] << "\";\""
-          << _matrix.windRoseCold[n] << "\";\""
-          << _matrix.windRoseWarm[n] << "\"" << endl;
+    for (size_t n = 0; n < _m.N; n++) {
+        o << "\"" << _m.windDirVals[n] << "\";\""
+          << _m.windRoseCold[n] << "\";\""
+          << _m.windRoseWarm[n] << "\"" << endl;
     }
 }
 
@@ -516,10 +390,10 @@ void Matrix_Calculator::_oStreamWindSpeedRepeatability(ostream& o)
 {
     o << "# повторяемость модуля скорости ветра по градации k " << endl
       << "\"Cкорость ветра, м/с\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
-    for (size_t k = 0; k < _matrix.K; k++) {
-        o << "\"" << _matrix.windSpeedVals[k] << "\";\""
-          << _matrix.windSpRepCold[k] << "\";\""
-          << _matrix.windSpRepWarm[k] << "\"" << endl;
+    for (size_t k = 0; k < _m.K; k++) {
+        o << "\"" << _m.windSpeedVals[k] << "\";\""
+          << _m.windSpRepCold[k] << "\";\""
+          << _m.windSpRepWarm[k] << "\"" << endl;
     }
 }
 
@@ -527,18 +401,18 @@ void Matrix_Calculator::_oStreamCalmRepeatability(ostream& o)
 {
     o << "# повторяемость штилей  " << endl
       << "\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl
-      << "\"" << _matrix.calmRepCold << "\";\""
-      << "\"" << _matrix.calmRepWarm << "\"" << endl; 
+      << "\"" << _m.calmRepCold << "\";\""
+      << "\"" << _m.calmRepWarm << "\"" << endl; 
 }
 
 void Matrix_Calculator::_oStreamSmithParamRepeatability(ostream& o)
 {
     o << "# повторяемость категорий устойчивости " << endl
       << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
-    for (size_t j = 0; j < _matrix.J; j++) {
-        o << "\"" << _matrix.smithParamVals[j] << "\";\""
-          << _matrix.smithParamRepCold[j] << "\";\""
-          << _matrix.smithParamRepWarm[j] << "\"" << endl;
+    for (size_t j = 0; j < _m.J; j++) {
+        o << "\"" << _m.smithParamVals[j] << "\";\""
+          << _m.smithParamRepCold[j] << "\";\""
+          << _m.smithParamRepWarm[j] << "\"" << endl;
     }
 }
 
@@ -546,10 +420,10 @@ void Matrix_Calculator::_oStreamAverageWindSpeedByCompPoint(ostream& o)
 {
     o << "# приземная средняя скорость ветра n−го румба " << endl
       << "\"Румб, град.\";\"Скорость ветра в холодное время года, м/с\";\"Скорость ветра в теплое время года, м/с\"" << endl;
-    for (size_t n = 0; n < _matrix.N; n++) {
-        o << "\"" << _matrix.windDirVals[n] << "\";\""
-          << _matrix.avWindSpByCPCold[n] << "\";\""
-          << _matrix.avWindSpByCPWarm[n] << "\"" << endl;
+    for (size_t n = 0; n < _m.N; n++) {
+        o << "\"" << _m.windDirVals[n] << "\";\""
+          << _m.avWindSpByCPCold[n] << "\";\""
+          << _m.avWindSpByCPWarm[n] << "\"" << endl;
     }
 }
 
@@ -557,9 +431,9 @@ void Matrix_Calculator::_oStreamAverageWindSpeedBySmithParam(ostream& o)
 {
     o << "# приземная средняя скорость ветра при j−ой категории устойчивости " << endl
       << "\"Категория устойчивости\";\"Повторяемость в холодное время года\";\"Повторяемость в теплое время года\"" << endl;
-    for (size_t j = 0; j < _matrix.J; j++) {
-        o << "\"" << _matrix.smithParamVals[j] << "\";\""
-          << _matrix.avWindSpBySPCold[j] << "\";\""
-          << _matrix.avWindSpBySPWarm[j] << "\"" << endl;
+    for (size_t j = 0; j < _m.J; j++) {
+        o << "\"" << _m.smithParamVals[j] << "\";\""
+          << _m.avWindSpBySPCold[j] << "\";\""
+          << _m.avWindSpBySPWarm[j] << "\"" << endl;
     }
 }

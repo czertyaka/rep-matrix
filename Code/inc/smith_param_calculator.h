@@ -14,7 +14,7 @@ class Smith_Param_Calculator
 
 public:
 
-    Smith_Param_Calculator(mm::observation_t& observation);
+    Smith_Param_Calculator(mm::observation_t& obs);
 
 private:
 

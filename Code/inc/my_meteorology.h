@@ -115,13 +115,51 @@ namespace mm
         double calmRepCold = 0; ///< повторяемость штилей в холодное время года
         double calmRepWarm = 0; ///< повторяемость штилей в теплое время года
 
-        double smithParamRepCold[J] = {0};; ///< повторяемость категорий устойчивости в холодное время года
-        double smithParamRepWarm[J] = {0};; ///< повторяемость категорий устойчивости в теплое время года
+        double smithParamRepCold[J] = {0}; ///< повторяемость категорий устойчивости в холодное время года
+        double smithParamRepWarm[J] = {0}; ///< повторяемость категорий устойчивости в теплое время года
 
-        double avWindSpByCPCold[N] = {0};; ///< ср. скорость ветра n-го румб в холодное время года
-        double avWindSpByCPWarm[N] = {0};; ///< ср. скорость ветра n-го румб в теплое время года
+        double avWindSpByCPCold[N] = {0}; ///< ср. скорость ветра n-го румб в холодное время года
+        double avWindSpByCPWarm[N] = {0}; ///< ср. скорость ветра n-го румб в теплое время года
 
         double avWindSpBySPCold[J] = {0}; ///< ср. скор. ветра при j−ой кат. уст. в холодное время года
         double avWindSpBySPWarm[J] = {0}; ///< ср. скор. ветра при j−ой кат. уст. в теплое время года
+
+        matrix_t() {};
+
+        matrix_t(const matrix_t& mCopy)
+        {
+            calmRepCold = mCopy.calmRepCold;
+            calmRepWarm = mCopy.calmRepWarm;
+
+            for (size_t n = 0; n < N; n++) {
+
+                windRoseCold[n] = mCopy.windRoseCold[n];
+                windRoseWarm[n] = mCopy.windRoseWarm[n];
+                avWindSpByCPCold[n] = mCopy.avWindSpByCPCold[n];
+                avWindSpByCPWarm[n] = mCopy.avWindSpByCPWarm[n];
+
+                for (size_t j = 0; j < J; j++) {
+
+                    smithParamRepCold[j] = mCopy.smithParamRepCold[j];
+                    smithParamRepWarm[j] = mCopy.smithParamRepWarm[j];
+                    avWindSpBySPCold[j] = mCopy.avWindSpBySPCold[j];
+                    avWindSpBySPWarm[j] = mCopy.avWindSpBySPWarm[j];
+
+                    for (size_t k = 0; k < K; k++) {
+                        
+                        windSpRepCold[k] = mCopy.windSpRepCold[k];
+                        windSpRepWarm[k] = mCopy.windSpRepWarm[k];
+
+                        windSpRepByCPCold[n][k] = mCopy.windSpRepByCPCold[n][k];
+                        windSpRepByCPWarm[n][k] = mCopy.windSpRepByCPWarm[n][k];
+
+                        mCold[n][j][k] = mCopy.mCold[n][j][k];
+                        mWarm[n][j][k] = mCopy.mWarm[n][j][k];
+                        wCold[n][j][k] = mCopy.wCold[n][j][k];
+                        wWarm[n][j][k] = mCopy.wWarm[n][j][k];
+                    }
+                }
+            }
+        }
     };
 }
